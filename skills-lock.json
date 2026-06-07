@@ -1,0 +1,8 @@
+{
+  "skills": {
+    "agent-browser": {
+      "source": "npm",
+      "package": "agent-browser"
+    }
+  }
+}
