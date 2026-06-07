@@ -2,13 +2,16 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import Link from "next/link";
-import { ArrowRight, MessageSquareOff } from "lucide-react";
+import { SearchX, ArrowRight } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 
-export default function Home() {
+interface EventNotFoundProps {
+  attemptedCode: string;
+}
+
+export function EventNotFound({ attemptedCode }: EventNotFoundProps) {
   const router = useRouter();
   const [code, setCode] = useState("");
 
@@ -21,27 +24,35 @@ export default function Home() {
 
   return (
     <main className="flex flex-1 flex-col items-center justify-center px-6 py-16">
-      <div className="w-full max-w-sm space-y-10">
-        <div className="space-y-4 text-center">
+      <div className="w-full max-w-sm space-y-8 text-center">
+        <div className="space-y-4">
           <div className="mx-auto flex size-14 items-center justify-center rounded-2xl bg-secondary">
-            <MessageSquareOff className="size-7 text-foreground" aria-hidden />
+            <SearchX className="size-7 text-muted-foreground" aria-hidden />
           </div>
-          <h1 className="text-4xl font-semibold tracking-tight">Unsaid</h1>
-          <p className="text-balance text-muted-foreground">
-            The feedback founders never hear.
-          </p>
+          <div className="space-y-2">
+            <h1 className="text-2xl font-semibold tracking-tight">
+              Event not found
+            </h1>
+            <p className="text-muted-foreground">
+              No event matches the code{" "}
+              <span className="font-mono font-medium text-foreground">
+                {attemptedCode}
+              </span>
+              . Double-check it and try again.
+            </p>
+          </div>
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-3">
+        <form onSubmit={handleSubmit} className="space-y-3 text-left">
           <label
-            htmlFor="event-code"
+            htmlFor="retry-code"
             className="block text-sm font-medium text-muted-foreground"
           >
-            I have an event code
+            Try another event code
           </label>
           <div className="flex gap-2">
             <Input
-              id="event-code"
+              id="retry-code"
               value={code}
               onChange={(e) => setCode(e.target.value.toUpperCase())}
               placeholder="e.g. 7KQ2MX"
@@ -49,29 +60,19 @@ export default function Home() {
               autoCapitalize="characters"
               autoComplete="off"
               spellCheck={false}
-              className="h-12 flex-1 text-center font-mono text-lg tracking-[0.3em] uppercase placeholder:tracking-normal placeholder:text-sm"
+              className="h-12 flex-1 text-center font-mono text-lg tracking-[0.3em] uppercase placeholder:text-sm placeholder:tracking-normal"
             />
             <Button
               type="submit"
               size="icon-lg"
               className="h-12 w-12"
               disabled={code.trim().length === 0}
-              aria-label="Join event"
+              aria-label="Try code"
             >
               <ArrowRight className="size-5" />
             </Button>
           </div>
         </form>
-
-        <p className="text-center text-sm text-muted-foreground">
-          Organizing a pitch event?{" "}
-          <Link
-            href="/new"
-            className="font-medium text-foreground underline-offset-4 hover:underline"
-          >
-            Create an event
-          </Link>
-        </p>
       </div>
     </main>
   );
