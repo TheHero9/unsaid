@@ -92,13 +92,16 @@
   --sidebar-accent-foreground: oklch(0.985 0 0);
   --sidebar-border: oklch(1 0 0 / 10%);
   --sidebar-ring: oklch(0.556 0 0);
-  /* Sentiment palette - dark-theme friendly, distinguishable, not garish */
-  --chip-positive: oklch(0.78 0.16 155);
-  --chip-positive-muted: oklch(0.78 0.16 155 / 14%);
-  --chip-negative: oklch(0.72 0.17 25);
-  --chip-negative-muted: oklch(0.72 0.17 25 / 14%);
-  --chip-neutral: oklch(0.76 0.05 250);
-  --chip-neutral-muted: oklch(0.76 0.05 250 / 14%);
+  /* Sentiment palette - dark-theme friendly, distinguishable, not garish.
+     Text/border tones kept light (L >= 0.84) so they stay readable on the
+     tinted -muted backgrounds; the tint itself is a low-alpha wash of a
+     deeper shade of the same hue. */
+  --chip-positive: oklch(0.86 0.14 155);
+  --chip-positive-muted: oklch(0.78 0.16 155 / 12%);
+  --chip-negative: oklch(0.84 0.13 25);
+  --chip-negative-muted: oklch(0.72 0.17 25 / 12%);
+  --chip-neutral: oklch(0.87 0.04 250);
+  --chip-neutral-muted: oklch(0.76 0.05 250 / 12%);
 }
 
 @layer base {

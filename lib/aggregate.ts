@@ -18,6 +18,15 @@ export interface FeedbackInputChip {
   sentiment: ChipSentiment;
 }
 
+/** A single 1-5 score attached to one feedback submission. */
+export interface FeedbackInputRating {
+  criterionId: string;
+  label: string;
+  /** true = a juror's personal criterion; false = event-wide. */
+  personal: boolean;
+  score: number;
+}
+
 /** One feedback submission from one juror. */
 export interface FeedbackInput {
   id: string;
@@ -26,6 +35,8 @@ export interface FeedbackInput {
   note: string | null;
   createdAt: string;
   chips: FeedbackInputChip[];
+  /** Optional so chip/note-only callers (and older fixtures) stay valid. */
+  ratings?: FeedbackInputRating[];
 }
 
 /** One aggregated chip line for the founder summary. */
@@ -43,6 +54,15 @@ export interface AggregatedNote {
   createdAt: string;
 }
 
+/** One aggregated 1-5 criterion line for the founder summary. */
+export interface CriterionScore {
+  label: string;
+  /** Mean of all scores for this criterion (full precision; format in UI). */
+  average: number;
+  /** Number of scores received. */
+  count: number;
+}
+
 export interface AggregatedFeedback {
   /** Distinct jurors who submitted any feedback for this pitch. */
   jurorCount: number;
@@ -52,6 +72,10 @@ export interface AggregatedFeedback {
   positiveCount: number;
   negativeCount: number;
   neutralCount: number;
+  /** Event-wide criteria averages; most-scored first, tie-break by label. */
+  criteriaScores: CriterionScore[];
+  /** Juror-personal criteria, listed separately; alphabetical by label. */
+  personalScores: CriterionScore[];
   /** Non-empty notes only, newest first. */
   notes: AggregatedNote[];
 }
@@ -60,6 +84,13 @@ interface ChipAccumulator {
   label: string;
   sentiment: ChipSentiment;
   jurorIds: Set<string>;
+}
+
+interface CriterionAccumulator {
+  label: string;
+  personal: boolean;
+  total: number;
+  count: number;
 }
 
 /**
@@ -75,6 +106,7 @@ interface ChipAccumulator {
 export function aggregateFeedback(rows: FeedbackInput[]): AggregatedFeedback {
   const jurorIds = new Set<string>();
   const chipMap = new Map<string, ChipAccumulator>();
+  const criterionMap = new Map<string, CriterionAccumulator>();
 
   let positiveCount = 0;
   let negativeCount = 0;
@@ -105,6 +137,22 @@ export function aggregateFeedback(rows: FeedbackInput[]): AggregatedFeedback {
       }
     }
 
+    for (const rating of row.ratings ?? []) {
+      // Keyed by criterion id - labels are already unique per event at the DB.
+      const existing = criterionMap.get(rating.criterionId);
+      if (existing) {
+        existing.total += rating.score;
+        existing.count += 1;
+      } else {
+        criterionMap.set(rating.criterionId, {
+          label: rating.label,
+          personal: rating.personal,
+          total: rating.score,
+          count: 1,
+        });
+      }
+    }
+
     const trimmedNote = row.note?.trim();
     if (trimmedNote) {
       notes.push({ note: trimmedNote, createdAt: row.createdAt });
@@ -122,6 +170,27 @@ export function aggregateFeedback(rows: FeedbackInput[]): AggregatedFeedback {
       return a.label.localeCompare(b.label);
     });
 
+  const toScore = (acc: CriterionAccumulator): CriterionScore => ({
+    label: acc.label,
+    average: acc.total / acc.count,
+    count: acc.count,
+  });
+
+  const allCriteria = Array.from(criterionMap.values());
+
+  const criteriaScores: CriterionScore[] = allCriteria
+    .filter((acc) => !acc.personal)
+    .map(toScore)
+    .sort((a, b) => {
+      if (b.count !== a.count) return b.count - a.count;
+      return a.label.localeCompare(b.label);
+    });
+
+  const personalScores: CriterionScore[] = allCriteria
+    .filter((acc) => acc.personal)
+    .map(toScore)
+    .sort((a, b) => a.label.localeCompare(b.label));
+
   notes.sort(
     (a, b) =>
       new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
@@ -133,6 +202,8 @@ export function aggregateFeedback(rows: FeedbackInput[]): AggregatedFeedback {
     positiveCount,
     negativeCount,
     neutralCount,
+    criteriaScores,
+    personalScores,
     notes,
   };
 }

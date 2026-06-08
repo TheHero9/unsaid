@@ -23,8 +23,64 @@ describe("aggregateFeedback", () => {
       positiveCount: 0,
       negativeCount: 0,
       neutralCount: 0,
+      criteriaScores: [],
+      personalScores: [],
       notes: [],
     });
+  });
+
+  it("averages event-wide criteria across jurors and separates personal ones", () => {
+    const result = aggregateFeedback([
+      row({
+        id: "f1",
+        jurorId: "j1",
+        ratings: [
+          { criterionId: "c1", label: "team", personal: false, score: 4 },
+          { criterionId: "c2", label: "market", personal: false, score: 2 },
+          { criterionId: "c3", label: "gtm", personal: true, score: 5 },
+        ],
+      }),
+      row({
+        id: "f2",
+        jurorId: "j2",
+        ratings: [
+          { criterionId: "c1", label: "team", personal: false, score: 5 },
+        ],
+      }),
+    ]);
+
+    // Most-scored first, tie-break by label.
+    expect(result.criteriaScores).toEqual([
+      { label: "team", average: 4.5, count: 2 },
+      { label: "market", average: 2, count: 1 },
+    ]);
+    // Personal criteria never mix into the event-wide list.
+    expect(result.personalScores).toEqual([
+      { label: "gtm", average: 5, count: 1 },
+    ]);
+  });
+
+  it("averages repeat scores for the same criterion", () => {
+    const result = aggregateFeedback([
+      row({
+        id: "f1",
+        jurorId: "j1",
+        ratings: [
+          { criterionId: "c1", label: "team", personal: false, score: 2 },
+        ],
+      }),
+      row({
+        id: "f2",
+        jurorId: "j1", // same juror re-rates in a later submission
+        ratings: [
+          { criterionId: "c1", label: "team", personal: false, score: 3 },
+        ],
+      }),
+    ]);
+
+    expect(result.criteriaScores).toEqual([
+      { label: "team", average: 2.5, count: 2 },
+    ]);
   });
 
   it("groups chips across different label casings/whitespace under one count", () => {

@@ -4,8 +4,12 @@ import { notFound, redirect } from "next/navigation";
 
 import { getAdminClient } from "@/lib/supabase/admin";
 import { jurorCookieName } from "@/lib/cookies";
-import { CaptureScreen } from "@/components/capture/CaptureScreen";
+import {
+  CaptureScreen,
+  type CaptureCriterion,
+} from "@/components/capture/CaptureScreen";
 import type { CaptureChip } from "@/components/capture/ChipsGrid";
+import type { JurorSubmission } from "@/components/capture/YourSubmissions";
 
 interface PageParams {
   params: Promise<{ eventCode: string; pitchId: string }>;
@@ -86,12 +90,58 @@ export default async function CapturePage({ params }: PageParams) {
     sentiment: c.sentiment,
   }));
 
+  // Criteria: event-wide (created_by IS NULL) + this juror's own.
+  const { data: criterionRows } = await admin
+    .from("u_criteria")
+    .select("id, label, created_by, created_at")
+    .eq("event_id", event.id)
+    .or(`created_by.is.null,created_by.eq.${juror.id}`)
+    .order("created_by", { ascending: true, nullsFirst: true })
+    .order("created_at", { ascending: true });
+
+  const criteria: CaptureCriterion[] = (criterionRows ?? []).map((c) => ({
+    id: c.id,
+    label: c.label,
+  }));
+
+  // This juror's OWN submissions for this pitch only - never anyone else's.
+  const { data: feedbackRows } = await admin
+    .from("u_feedback")
+    .select(
+      "id, note, created_at, u_feedback_chips(u_chips(id, label, sentiment)), u_feedback_ratings(score, u_criteria(id, label))"
+    )
+    .eq("pitch_id", pitch.id)
+    .eq("juror_id", juror.id)
+    .order("created_at", { ascending: false });
+
+  const submissions: JurorSubmission[] = (feedbackRows ?? []).map((row) => ({
+    id: row.id,
+    note: row.note,
+    createdAt: row.created_at,
+    chips: row.u_feedback_chips
+      .map((fc) => fc.u_chips)
+      .filter((c) => c !== null),
+    ratings: row.u_feedback_ratings.flatMap((fr) =>
+      fr.u_criteria
+        ? [
+            {
+              criterionId: fr.u_criteria.id,
+              label: fr.u_criteria.label,
+              score: fr.score,
+            },
+          ]
+        : []
+    ),
+  }));
+
   return (
     <CaptureScreen
       eventCode={normalizedCode}
       pitchId={pitch.id}
       pitchName={pitch.name}
       initialChips={chips}
+      initialCriteria={criteria}
+      submissions={submissions}
     />
   );
 }

@@ -204,6 +204,78 @@ export interface Database {
           },
         ];
       };
+      u_criteria: {
+        Row: {
+          id: string;
+          event_id: string;
+          label: string;
+          created_by: string | null;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          event_id: string;
+          label: string;
+          created_by?: string | null;
+          created_at?: string;
+        };
+        Update: {
+          id?: string;
+          event_id?: string;
+          label?: string;
+          created_by?: string | null;
+          created_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "u_criteria_event_id_fkey";
+            columns: ["event_id"];
+            isOneToOne: false;
+            referencedRelation: "u_events";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "u_criteria_created_by_fkey";
+            columns: ["created_by"];
+            isOneToOne: false;
+            referencedRelation: "u_jurors";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      u_feedback_ratings: {
+        Row: {
+          feedback_id: string;
+          criterion_id: string;
+          score: number;
+        };
+        Insert: {
+          feedback_id: string;
+          criterion_id: string;
+          score: number;
+        };
+        Update: {
+          feedback_id?: string;
+          criterion_id?: string;
+          score?: number;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "u_feedback_ratings_feedback_id_fkey";
+            columns: ["feedback_id"];
+            isOneToOne: false;
+            referencedRelation: "u_feedback";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "u_feedback_ratings_criterion_id_fkey";
+            columns: ["criterion_id"];
+            isOneToOne: false;
+            referencedRelation: "u_criteria";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
       u_feedback_chips: {
         Row: {
           feedback_id: string;

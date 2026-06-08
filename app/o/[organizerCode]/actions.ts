@@ -4,12 +4,23 @@ import { revalidatePath } from "next/cache";
 
 import { getAdminClient } from "@/lib/supabase/admin";
 import { generatePrivateCode } from "@/lib/codes";
+import { normalizeLabel } from "@/lib/labels";
 import {
   createPitchSchema,
   deletePitchSchema,
   type CreatePitchInput,
   type DeletePitchInput,
 } from "@/schemas/pitch";
+import {
+  organizerAddChipSchema,
+  organizerDeleteChipSchema,
+  organizerAddCriterionSchema,
+  organizerDeleteCriterionSchema,
+  type OrganizerAddChipInput,
+  type OrganizerDeleteChipInput,
+  type OrganizerAddCriterionInput,
+  type OrganizerDeleteCriterionInput,
+} from "@/schemas/organizer";
 
 export interface ActionResult {
   ok: boolean;
@@ -129,6 +140,174 @@ export async function deletePitchAction(
 
   if (error) {
     return { ok: false, error: "Could not delete the pitch. Please try again." };
+  }
+
+  revalidatePath(`/o/${organizer_code}`);
+  return { ok: true };
+}
+
+/**
+ * Add an event-wide chip (created_by NULL - visible to every juror). If the
+ * label already exists for this event (even as a juror's personal chip) it is
+ * promoted to event-wide instead of duplicated.
+ */
+export async function addEventChipAction(
+  input: OrganizerAddChipInput
+): Promise<ActionResult> {
+  const parsed = organizerAddChipSchema.safeParse(input);
+  if (!parsed.success) {
+    return { ok: false, error: parsed.error.issues[0]?.message ?? "Invalid input" };
+  }
+
+  const { organizer_code, label, sentiment } = parsed.data;
+
+  const eventId = await resolveEventId(organizer_code);
+  if (!eventId) {
+    return { ok: false, error: "Event not found." };
+  }
+
+  const admin = getAdminClient();
+  const normalized = normalizeLabel(label);
+
+  const { error: insertError } = await admin.from("u_chips").insert({
+    event_id: eventId,
+    label: normalized,
+    sentiment,
+    created_by: null,
+  });
+
+  if (insertError) {
+    if (insertError.code !== PG_UNIQUE_VIOLATION) {
+      return { ok: false, error: "Could not add the chip. Please try again." };
+    }
+    // Label exists - promote it to event-wide with the organizer's sentiment.
+    const { error: promoteError } = await admin
+      .from("u_chips")
+      .update({ created_by: null, sentiment })
+      .eq("event_id", eventId)
+      .eq("label", normalized);
+
+    if (promoteError) {
+      return { ok: false, error: "Could not add the chip. Please try again." };
+    }
+  }
+
+  revalidatePath(`/o/${organizer_code}`);
+  return { ok: true };
+}
+
+/**
+ * Delete an event-wide chip. Scoped to event-wide rows only (created_by IS
+ * NULL) so a stray id can never remove a juror's personal chip. Past feedback
+ * selections of this chip are removed with it (DB cascade).
+ */
+export async function deleteEventChipAction(
+  input: OrganizerDeleteChipInput
+): Promise<ActionResult> {
+  const parsed = organizerDeleteChipSchema.safeParse(input);
+  if (!parsed.success) {
+    return { ok: false, error: parsed.error.issues[0]?.message ?? "Invalid input" };
+  }
+
+  const { organizer_code, chip_id } = parsed.data;
+
+  const eventId = await resolveEventId(organizer_code);
+  if (!eventId) {
+    return { ok: false, error: "Event not found." };
+  }
+
+  const admin = getAdminClient();
+  const { error } = await admin
+    .from("u_chips")
+    .delete()
+    .eq("id", chip_id)
+    .eq("event_id", eventId)
+    .is("created_by", null);
+
+  if (error) {
+    return { ok: false, error: "Could not delete the chip. Please try again." };
+  }
+
+  revalidatePath(`/o/${organizer_code}`);
+  return { ok: true };
+}
+
+/**
+ * Add an event-wide rating criterion (created_by NULL). Existing labels
+ * (including a juror's personal criterion) are promoted to event-wide.
+ */
+export async function addEventCriterionAction(
+  input: OrganizerAddCriterionInput
+): Promise<ActionResult> {
+  const parsed = organizerAddCriterionSchema.safeParse(input);
+  if (!parsed.success) {
+    return { ok: false, error: parsed.error.issues[0]?.message ?? "Invalid input" };
+  }
+
+  const { organizer_code, label } = parsed.data;
+
+  const eventId = await resolveEventId(organizer_code);
+  if (!eventId) {
+    return { ok: false, error: "Event not found." };
+  }
+
+  const admin = getAdminClient();
+  const normalized = normalizeLabel(label);
+
+  const { error: insertError } = await admin.from("u_criteria").insert({
+    event_id: eventId,
+    label: normalized,
+    created_by: null,
+  });
+
+  if (insertError) {
+    if (insertError.code !== PG_UNIQUE_VIOLATION) {
+      return { ok: false, error: "Could not add the criterion. Please try again." };
+    }
+    const { error: promoteError } = await admin
+      .from("u_criteria")
+      .update({ created_by: null })
+      .eq("event_id", eventId)
+      .eq("label", normalized);
+
+    if (promoteError) {
+      return { ok: false, error: "Could not add the criterion. Please try again." };
+    }
+  }
+
+  revalidatePath(`/o/${organizer_code}`);
+  return { ok: true };
+}
+
+/**
+ * Delete an event-wide criterion. Scoped to created_by IS NULL; its scores
+ * are removed with it (DB cascade).
+ */
+export async function deleteEventCriterionAction(
+  input: OrganizerDeleteCriterionInput
+): Promise<ActionResult> {
+  const parsed = organizerDeleteCriterionSchema.safeParse(input);
+  if (!parsed.success) {
+    return { ok: false, error: parsed.error.issues[0]?.message ?? "Invalid input" };
+  }
+
+  const { organizer_code, criterion_id } = parsed.data;
+
+  const eventId = await resolveEventId(organizer_code);
+  if (!eventId) {
+    return { ok: false, error: "Event not found." };
+  }
+
+  const admin = getAdminClient();
+  const { error } = await admin
+    .from("u_criteria")
+    .delete()
+    .eq("id", criterion_id)
+    .eq("event_id", eventId)
+    .is("created_by", null);
+
+  if (error) {
+    return { ok: false, error: "Could not delete the criterion. Please try again." };
   }
 
   revalidatePath(`/o/${organizer_code}`);

@@ -6,7 +6,11 @@ import { getAdminClient } from "@/lib/supabase/admin";
 import { jurorCookieName } from "@/lib/cookies";
 import { normalizeLabel } from "@/lib/labels";
 import type { ChipSentiment } from "@/lib/chips";
-import { addChipSchema, submitFeedbackSchema } from "@/schemas/feedback";
+import {
+  addChipSchema,
+  addCriterionSchema,
+  submitFeedbackSchema,
+} from "@/schemas/feedback";
 
 /**
  * Re-resolve and verify the full capability triangle server-side:
@@ -105,13 +109,70 @@ export async function addCustomChip(
   return { ok: false, error: "Could not add that chip. Please try again." };
 }
 
+export type AddCriterionResult =
+  | { ok: true; criterion: { id: string; label: string } }
+  | { ok: false; error: string };
+
+/**
+ * Upsert a juror-personal rating criterion by (event_id, normalized label).
+ * Mirrors addCustomChip: on a unique-violation re-select and return the
+ * existing row (whether event-wide or another juror's - labels are unique per
+ * event, and submit-side validation still gates who may score what).
+ */
+export async function addCustomCriterion(
+  eventCode: string,
+  pitchId: string,
+  input: unknown
+): Promise<AddCriterionResult> {
+  const parsed = addCriterionSchema.safeParse(input);
+  if (!parsed.success) {
+    return { ok: false, error: parsed.error.issues[0]?.message ?? "Invalid label" };
+  }
+
+  const ctx = await resolveContext(eventCode, pitchId);
+  if (!ctx) return { ok: false, error: "Your session has expired. Rejoin the event." };
+
+  const { admin, eventId, jurorId } = ctx;
+  const normalized = normalizeLabel(parsed.data.label);
+
+  const { data: inserted, error: insertError } = await admin
+    .from("u_criteria")
+    .insert({
+      event_id: eventId,
+      label: normalized,
+      created_by: jurorId,
+    })
+    .select("id, label")
+    .single();
+
+  if (!insertError && inserted) {
+    return { ok: true, criterion: inserted };
+  }
+
+  // Unique-violation (or any insert miss): re-select the existing label.
+  const { data: existing } = await admin
+    .from("u_criteria")
+    .select("id, label, created_by")
+    .eq("event_id", eventId)
+    .eq("label", normalized)
+    .maybeSingle();
+
+  // Only reuse rows this juror is allowed to score: event-wide or their own.
+  if (existing && (existing.created_by === null || existing.created_by === jurorId)) {
+    return { ok: true, criterion: { id: existing.id, label: existing.label } };
+  }
+
+  return { ok: false, error: "Could not add that criterion. Please try again." };
+}
+
 export type SubmitFeedbackResult = { ok: true } | { ok: false; error: string };
 
 /**
- * Insert one feedback row + its chip junction rows after verifying the
- * triangle. Every submitted chip must belong to this event AND be a default
- * (created_by IS NULL) or owned by this juror. Requires >= 1 chip OR a
- * non-empty note. Note trimmed; stored NULL when empty.
+ * Insert one feedback row + its chip junction rows + its rating rows after
+ * verifying the triangle. Every submitted chip AND rated criterion must belong
+ * to this event AND be a default (created_by IS NULL) or owned by this juror.
+ * Requires >= 1 chip OR a non-empty note OR >= 1 rating. Note trimmed; stored
+ * NULL when empty.
  */
 export async function submitFeedback(
   eventCode: string,
@@ -122,7 +183,9 @@ export async function submitFeedback(
   if (!parsed.success) {
     return {
       ok: false,
-      error: parsed.error.issues[0]?.message ?? "Add at least one chip or a note",
+      error:
+        parsed.error.issues[0]?.message ??
+        "Add at least one chip, rating, or note",
     };
   }
 
@@ -134,8 +197,21 @@ export async function submitFeedback(
   const noteTrimmed = parsed.data.note.trim();
   const chipIds = Array.from(new Set(parsed.data.chipIds));
 
-  if (chipIds.length === 0 && noteTrimmed.length === 0) {
-    return { ok: false, error: "Tap at least one chip or write a note." };
+  // De-dupe ratings by criterion (last score wins).
+  const ratingByCriterion = new Map<string, number>();
+  for (const r of parsed.data.ratings) {
+    ratingByCriterion.set(r.criterionId, r.score);
+  }
+  const ratings = Array.from(ratingByCriterion, ([criterionId, score]) => ({
+    criterionId,
+    score,
+  }));
+
+  if (chipIds.length === 0 && noteTrimmed.length === 0 && ratings.length === 0) {
+    return {
+      ok: false,
+      error: "Tap at least one chip, rate a criterion, or write a note.",
+    };
   }
 
   // Verify every chip belongs to this event AND is default or owned by juror.
@@ -154,6 +230,29 @@ export async function submitFeedback(
 
     if (allowed.size !== chipIds.length) {
       return { ok: false, error: "Some chips are no longer available." };
+    }
+  }
+
+  // Verify every rated criterion belongs to this event AND is default or
+  // owned by this juror - same rule as chips.
+  if (ratings.length > 0) {
+    const { data: validCriteria } = await admin
+      .from("u_criteria")
+      .select("id, created_by")
+      .eq("event_id", eventId)
+      .in(
+        "id",
+        ratings.map((r) => r.criterionId)
+      );
+
+    const allowedCriteria = new Set(
+      (validCriteria ?? [])
+        .filter((c) => c.created_by === null || c.created_by === jurorId)
+        .map((c) => c.id)
+    );
+
+    if (allowedCriteria.size !== ratings.length) {
+      return { ok: false, error: "Some criteria are no longer available." };
     }
   }
 
@@ -178,6 +277,22 @@ export async function submitFeedback(
 
     if (junctionError) {
       // Best-effort rollback so we don't leave an orphan feedback row.
+      await admin.from("u_feedback").delete().eq("id", feedback.id);
+      return { ok: false, error: "Could not submit. Please try again." };
+    }
+  }
+
+  if (ratings.length > 0) {
+    const { error: ratingsError } = await admin.from("u_feedback_ratings").insert(
+      ratings.map((r) => ({
+        feedback_id: feedback.id,
+        criterion_id: r.criterionId,
+        score: r.score,
+      }))
+    );
+
+    if (ratingsError) {
+      // Best-effort rollback (cascades to the chip junction rows too).
       await admin.from("u_feedback").delete().eq("id", feedback.id);
       return { ok: false, error: "Could not submit. Please try again." };
     }

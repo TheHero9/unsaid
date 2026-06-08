@@ -7,10 +7,12 @@ import {
   aggregateFeedback,
   type FeedbackInput,
   type FeedbackInputChip,
+  type FeedbackInputRating,
 } from "@/lib/aggregate";
 import type { ChipSentiment } from "@/lib/chips";
 import { ChipSummary } from "@/components/feedback/ChipSummary";
 import { SentimentBar } from "@/components/feedback/SentimentBar";
+import { CriteriaScores } from "@/components/feedback/CriteriaScores";
 import { NotesFeed } from "@/components/feedback/NotesFeed";
 
 // Feedback is live - never cache; fresh on every load.
@@ -77,7 +79,7 @@ async function loadAggregate(pitchId: string) {
   const { data, error } = await admin
     .from("u_feedback")
     .select(
-      "id, juror_id, note, created_at, u_feedback_chips(u_chips(label, sentiment))"
+      "id, juror_id, note, created_at, u_feedback_chips(u_chips(label, sentiment)), u_feedback_ratings(score, u_criteria(id, label, created_by))"
     )
     .eq("pitch_id", pitchId);
 
@@ -97,12 +99,29 @@ async function loadAggregate(pitchId: string) {
       )
       .map((chip) => ({ label: chip.label, sentiment: chip.sentiment }));
 
+    // created_by is consumed HERE as a boolean only - the juror id behind a
+    // personal criterion never reaches the aggregate output or the UI.
+    const ratings: FeedbackInputRating[] = (fb.u_feedback_ratings ?? []).flatMap(
+      (link) =>
+        link.u_criteria
+          ? [
+              {
+                criterionId: link.u_criteria.id,
+                label: link.u_criteria.label,
+                personal: link.u_criteria.created_by !== null,
+                score: link.score,
+              },
+            ]
+          : []
+    );
+
     return {
       id: fb.id,
       jurorId: fb.juror_id,
       note: fb.note,
       createdAt: fb.created_at,
       chips,
+      ratings,
     };
   });
 
@@ -145,6 +164,10 @@ export default async function FounderPage({ params }: FounderPageProps) {
             positiveCount={aggregate.positiveCount}
             negativeCount={aggregate.negativeCount}
             neutralCount={aggregate.neutralCount}
+          />
+          <CriteriaScores
+            criteriaScores={aggregate.criteriaScores}
+            personalScores={aggregate.personalScores}
           />
           <NotesFeed notes={aggregate.notes} />
         </>

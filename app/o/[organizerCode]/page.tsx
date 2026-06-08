@@ -8,6 +8,8 @@ import {
   ExternalLink,
   Inbox,
   MapPin,
+  SlidersHorizontal,
+  Tags,
   Users,
 } from "lucide-react";
 
@@ -23,6 +25,11 @@ import { Separator } from "@/components/ui/separator";
 import { CopyButton } from "@/components/organizer/CopyButton";
 import { AddPitchForm } from "@/components/organizer/AddPitchForm";
 import { DeletePitchDialog } from "@/components/organizer/DeletePitchDialog";
+import { ChipManager, type ManagedChip } from "@/components/organizer/ChipManager";
+import {
+  CriteriaManager,
+  type ManagedCriterion,
+} from "@/components/organizer/CriteriaManager";
 import type { Tables } from "@/lib/supabase/database.types";
 
 export const dynamic = "force-dynamic";
@@ -80,6 +87,24 @@ export default async function OrganizerDashboardPage({
     .order("position", { ascending: true });
 
   const pitches: PitchRow[] = pitchesData ?? [];
+
+  // Event-wide feedback setup (created_by IS NULL) - jurors' personal chips
+  // and criteria belong to them and are not managed here.
+  const { data: chipRows } = await admin
+    .from("u_chips")
+    .select("id, label, sentiment")
+    .eq("event_id", event.id)
+    .is("created_by", null)
+    .order("created_at", { ascending: true });
+  const eventChips: ManagedChip[] = chipRows ?? [];
+
+  const { data: criterionRows } = await admin
+    .from("u_criteria")
+    .select("id, label")
+    .eq("event_id", event.id)
+    .is("created_by", null)
+    .order("created_at", { ascending: true });
+  const eventCriteria: ManagedCriterion[] = criterionRows ?? [];
 
   const base = appUrl();
   const publicLink = `${base}/e/${event.public_code}`;
@@ -177,6 +202,42 @@ export default async function OrganizerDashboardPage({
                 />
               </div>
             </div>
+          </CardContent>
+        </Card>
+
+        {/* Feedback setup */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Tags className="size-4" aria-hidden />
+              Feedback chips
+            </CardTitle>
+            <CardDescription>
+              The tap-to-react chips every juror sees. Jurors can still add
+              their own on the fly.
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <ChipManager organizerCode={organizerCode} chips={eventChips} />
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <SlidersHorizontal className="size-4" aria-hidden />
+              Rating criteria
+            </CardTitle>
+            <CardDescription>
+              1-5 scales every juror can score. Founders see the average per
+              criterion.
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <CriteriaManager
+              organizerCode={organizerCode}
+              criteria={eventCriteria}
+            />
           </CardContent>
         </Card>
 
