@@ -1,20 +1,20 @@
-# S7 - (Stretch) "I'd like to connect" flag
+﻿# S7 - (Stretch) "I'd like to connect" flag
 
-Status: 🧊 Stretch - only if time remains after S6 freeze
+Status: ðŸ§Š Stretch - only if time remains after S6 freeze
 
-## 🎯 Goal
+## ðŸŽ¯ Goal
 
 The strongest stretch from `SPECS.md`: a juror can flag "I'd like to connect"
 on a pitch; the founder sees interest exists; the ORGANIZER brokers the
 introduction (authorship is staff-visible by design).
 
-## ⚠️ Gate
+## âš ï¸ Gate
 
 Do NOT start this unless S6 is fully done, frozen, rehearsed, and there is
 genuinely time left. Peer/attendee feedback (the other stretch) stays in
 `NEXT_TIME.md` regardless.
 
-## ✅ Acceptance criteria (sketch - refine if actually built)
+## âœ… Acceptance criteria (sketch - refine if actually built)
 
 1. Capture screen: a distinct, separated "I'd like to connect" toggle
    (NOT mixed into the chips) persisted per (juror, pitch)
@@ -26,13 +26,13 @@ genuinely time left. Peer/attendee feedback (the other stretch) stays in
    RLS deny-all like everything else
 5. Full gate green; the demo arc still rehearsed and unchanged
 
-## 📝 Prompt
+## ðŸ“ Prompt
 
 ```
 Read AGENTS.md and SPECS.md (stretch section) first. Confirm with me that S6
 is frozen before touching anything.
 
-Execute stretch step S7 for Unsaid per specs/05-setup/08-S7-stretch.md:
+Execute stretch step S7 for Nondit per specs/05-setup/08-S7-stretch.md:
 migration u_connect_flags (collision-check first, RLS deny-all), capture
 toggle (separate visual zone from chips), founder interest line, organizer
 authorship list. Keep it small; the demo must not regress.

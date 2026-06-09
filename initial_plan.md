@@ -1,4 +1,4 @@
-# Unsaid — Requirements Interview (v1 scoping)
+﻿# Nondit â€” Requirements Interview (v1 scoping)
 
 > Answer inline under each `>>`. Skip anything you don't care about.
 > Goal: lock what's actually IN the first version before anyone writes code.
@@ -6,13 +6,13 @@
 
 ---
 
-## A. Problem & framing — is the core bet right?
+## A. Problem & framing â€” is the core bet right?
 
-**A1.** The whole product rests on the §3 insight (feedback evaporates when there's no mutual interest). Is that an assumption you _believe_ or one you've _seen_? Have you yourself left a pitch event with no feedback?
+**A1.** The whole product rests on the Â§3 insight (feedback evaporates when there's no mutual interest). Is that an assumption you _believe_ or one you've _seen_? Have you yourself left a pitch event with no feedback?
 
 > > yea it happens very often usually you would get only the positiive feedback from the mentors and they will void the negative aspects of the pitch/demo so we want to get everything thats noted during the pitch
 
-**A2.** Who feels this pain most acutely — the founder who got nothing, or the organizer who looks bad when founders leave unhappy? Whose problem are we actually selling on 11 June?
+**A2.** Who feels this pain most acutely â€” the founder who got nothing, or the organizer who looks bad when founders leave unhappy? Whose problem are we actually selling on 11 June?
 
 > > usually the founder might not have enough feedback and be in a position to ask for somehting to reflect on
 
@@ -24,7 +24,7 @@
 
 ## B. Users & roles for v1
 
-**B1.** For the _first version_, do we need all four roles (organizer / juror / founder / peer) working, or is v1 just **juror → founder** and everything else is later?
+**B1.** For the _first version_, do we need all four roles (organizer / juror / founder / peer) working, or is v1 just **juror â†’ founder** and everything else is later?
 
 > > yea we need the two roles and maybe one for the other participants. The idea is to open the app login with your name/role and just start sharing
 
@@ -32,7 +32,7 @@
 
 > > So maybe a QR link only for this event. Soemone from the staff will create an evenet and tnter the different pitches and the jurors can get in and give feedback for a pitch
 
-**B3.** Roughly how many jurors, how many startups, how many peers at the 11 June event? (Scale changes the design — 5 jurors is different from 50 peers.)
+**B3.** Roughly how many jurors, how many startups, how many peers at the 11 June event? (Scale changes the design â€” 5 jurors is different from 50 peers.)
 
 > > jurors 5-10 pitches again depends 5-20
 
@@ -58,13 +58,13 @@
 
 ---
 
-## D. Honesty vs. attribution (§5a) — the philosophical core
+## D. Honesty vs. attribution (Â§5a) â€” the philosophical core
 
 **D1.** Per-note visibility (named / anonymous) is elegant but adds a decision to every note. Under time pressure, will jurors actually choose, or will they default to one? What should the _default_ be?
 
 > > Maybe they wilkl be already logged in so they wont have a decision to make to post only for a specific pitch something as anonyme user
 
-**D2.** Is anonymous feedback truly anonymous to the founder only, or also to the organizer? (If an organizer can de-anonymize, it's not really anonymous — decide this.)
+**D2.** Is anonymous feedback truly anonymous to the founder only, or also to the organizer? (If an organizer can de-anonymize, it's not really anonymous â€” decide this.)
 
 > > Make it visible for now
 
@@ -74,25 +74,25 @@
 
 ---
 
-## E. Founder delivery (§4 payoff)
+## E. Founder delivery (Â§4 payoff)
 
-**E1.** When does a founder see feedback — after their own slot, or all at the end of the event? (Handoff recommends end-of-event.)
+**E1.** When does a founder see feedback â€” after their own slot, or all at the end of the event? (Handoff recommends end-of-event.)
 
 > > Doesnt matter could be live just have a section for his feedback
 
-**E2.** What does the consolidated view look like in your head — a list of notes? Grouped by tag? A short summary on top? Describe the screen a founder opens.
+**E2.** What does the consolidated view look like in your head â€” a list of notes? Grouped by tag? A short summary on top? Describe the screen a founder opens.
 
 > > We want nice visualization
 
-**E3.** Is the Claude AI-synthesis layer ("3 jurors flagged your go-to-market") a v1 feature or a stretch you'll only add if there's time? Be decisive — it changes the build.
+**E3.** Is the Claude AI-synthesis layer ("3 jurors flagged your go-to-market") a v1 feature or a stretch you'll only add if there's time? Be decisive â€” it changes the build.
 
 > > Ni need for AI synthesis
 
 ---
 
-## F. Scope — what's truly v1 vs cut
+## F. Scope â€” what's truly v1 vs cut
 
-**F1.** Of CORE features 1–4 in §6, if you had to ship only TWO for the demo to land, which two?
+**F1.** Of CORE features 1â€“4 in Â§6, if you had to ship only TWO for the demo to land, which two?
 
 > > s
 
@@ -100,7 +100,7 @@
 
 > >
 
-**F3.** The "I'd like to connect" flag — does this stay cut, or is it secretly the most demo-able moment (feedback → real networking)?
+**F3.** The "I'd like to connect" flag â€” does this stay cut, or is it secretly the most demo-able moment (feedback â†’ real networking)?
 
 > >
 
@@ -116,7 +116,7 @@
 
 > >
 
-**G2.** The demo ends on the scattered → consolidated transform. Do we have _realistic seed data_ (real-ish startup names, plausible notes) ready, or does someone need to write it?
+**G2.** The demo ends on the scattered â†’ consolidated transform. Do we have _realistic seed data_ (real-ish startup names, plausible notes) ready, or does someone need to write it?
 
 > >
 
@@ -126,9 +126,9 @@
 
 ---
 
-## H. Open decisions from §12 (just pick)
+## H. Open decisions from Â§12 (just pick)
 
-**H1.** Final name — keep "Unsaid" or something else?
+**H1.** Final name â€” keep "Nondit" or something else?
 
 > >
 

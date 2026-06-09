@@ -1,7 +1,7 @@
-# Unsaid — Product Build Brief
+﻿# Nondit â€” Product Build Brief
 
 > Hand this to Claude Code as the product definition. **Decide the stack,
-> architecture, data model, and routes yourself** — they're not specified here on
+> architecture, data model, and routes yourself** â€” they're not specified here on
 > purpose. Preserve every product decision and rule below; refine the rest.
 > One-day build, small team. Anything not listed here is OUT of v1.
 
@@ -9,8 +9,8 @@
 
 ## What we're building
 
-A pitch-feedback tool that captures everything jurors notice during a pitch —
-including the critical observations they'd normally soften or leave out — and
+A pitch-feedback tool that captures everything jurors notice during a pitch â€”
+including the critical observations they'd normally soften or leave out â€” and
 delivers it to the founder as one clean, visual page.
 
 **Why it matters:** at pitch events, founders mostly get polite, positive feedback.
@@ -27,20 +27,20 @@ Build the general "event with pitches" shape; the 1-on-1 case comes for free.
 
 ## Who uses it (3 roles)
 
-- **Organizer / staff** — creates an event, adds the pitches, gets the codes to share.
-- **Juror** — gives feedback on pitches. The primary capture user.
-- **Founder** — reads only their own pitch's feedback. The payoff user.
+- **Organizer / staff** â€” creates an event, adds the pitches, gets the codes to share.
+- **Juror** â€” gives feedback on pitches. The primary capture user.
+- **Founder** â€” reads only their own pitch's feedback. The payoff user.
 
 (A peer/attendee role is a later stretch, not v1.)
 
 ---
 
-## Access model — the one rule that must not break
+## Access model â€” the one rule that must not break
 
 There are **two separate ways in**, because they do different jobs:
 
 1. **A public, give-feedback way in (the event).** This is shared openly with the
-   jury — shown on a screen, passed around. Anyone who has it can _give_ feedback.
+   jury â€” shown on a screen, passed around. Anyone who has it can _give_ feedback.
    It must **not** let anyone _read_ a founder's consolidated feedback.
 
 2. **A private, read-your-feedback way in (per pitch).** Each pitch has its own
@@ -50,7 +50,7 @@ There are **two separate ways in**, because they do different jobs:
 Hard requirements:
 
 - A founder can only ever see **their own** feedback, never another pitch's.
-- A random person must **not** be able to reach any founder's feedback — the private
+- A random person must **not** be able to reach any founder's feedback â€” the private
   link must be **unguessable and non-enumerable** (no "next/previous pitch" by counting).
 - The public event entry never exposes feedback for reading.
 
@@ -66,7 +66,7 @@ directly must work without depending on email arriving.
 
 1. Create an event (name, date, location).
 2. Add the pitches. Each pitch has: **product name** (required), **description**
-   (optional), **slides link** (optional — e.g. a Google Drive link), and optionally
+   (optional), **slides link** (optional â€” e.g. a Google Drive link), and optionally
    the **founder's email** for delivering their private link.
 3. Get the shareable codes: one public event code for the jury, and one private
    per-pitch code for each founder.
@@ -76,23 +76,23 @@ directly must work without depending on email arriving.
 
 1. Enter via the event code, give your name.
 2. See the list of all pitches in the event.
-3. Tap whichever pitch is being presented right now — the juror chooses; there's no
+3. Tap whichever pitch is being presented right now â€” the juror chooses; there's no
    automatic "current pitcher." (If the slides link exists, make it reachable here.)
 4. On the capture screen: tap chips and optionally add a one-line note. Submit.
-5. Can come back and add more — to the same pitch or others — anytime during the event.
+5. Can come back and add more â€” to the same pitch or others â€” anytime during the event.
 
 ### Founder
 
-1. Enter via their private per-pitch link — no name entry, no login. The link is the key.
+1. Enter via their private per-pitch link â€” no name entry, no login. The link is the key.
 2. Land directly on their feedback page (see below).
 
 ---
 
-## Capture screen (HERO #1 — give it the most care)
+## Capture screen (HERO #1 â€” give it the most care)
 
 This is used live, under time pressure (~4-min pitches, ~1-min gaps), on a phone.
 
-- **Chips** are the primary input — one tap each, big tap targets, instant feel.
+- **Chips** are the primary input â€” one tap each, big tap targets, instant feel.
 - A chip's selected/unselected state must be obvious and immediate.
 - Chips are **sentiment-coloured** (positive / negative / neutral) so capture stays fast.
 - The juror can **add their own custom chip on the fly**; once added it stays available
@@ -100,15 +100,15 @@ This is used live, under time pressure (~4-min pitches, ~1-min gaps), on a phone
 - An **optional one-line note** below the chips. Nobody writes paragraphs live.
 - Submitting must feel instant and never lose the juror's place in the flow.
 
-## Founder feedback view (HERO #2 — the visible payoff)
+## Founder feedback view (HERO #2 â€” the visible payoff)
 
 This is the "oh, nice" moment: scattered taps from many jurors become one clean page.
 
-- **Top: a chip summary** — how many jurors used each chip, most-used first
+- **Top: a chip summary** â€” how many jurors used each chip, most-used first
   (e.g. "5 said _unclear ask_").
 - **A clear positive-vs-negative read** of the overall feedback at a glance.
 - **Below: the freeform notes**, newest first.
-- Everything here is **anonymous to the founder** — never show who said what.
+- Everything here is **anonymous to the founder** â€” never show who said what.
 - A good-looking, confident, mobile-friendly page. This screen is what sells the product.
 
 ---
@@ -128,9 +128,9 @@ This is the "oh, nice" moment: scattered taps from many jurors become one clean 
 
 - **Anonymous to the founder.** The founder never sees which juror said what.
 - **Visible to the organizer.** Staff _can_ see authorship (no true anonymity needed in v1).
-- **Live is fine.** Feedback can appear to the founder as soon as it's submitted — no
+- **Live is fine.** Feedback can appear to the founder as soon as it's submitted â€” no
   draft/approval/refine step in v1.
-- **No moderation, no quality gates** in v1 — trust the professional jury.
+- **No moderation, no quality gates** in v1 â€” trust the professional jury.
 - **Mobile-first everywhere.** Everyone arrives by scanning a code on their phone.
 
 ---
@@ -140,8 +140,8 @@ This is the "oh, nice" moment: scattered taps from many jurors become one clean 
 1. Organizer: create event + add pitches + view the codes to share.
 2. Juror: join (enter name).
 3. Juror: pitch list.
-4. **Juror: capture screen** (chips + note) — HERO.
-5. **Founder: feedback view** — HERO.
+4. **Juror: capture screen** (chips + note) â€” HERO.
+5. **Founder: feedback view** â€” HERO.
 
 Founders need no join screen; their private link opens straight to screen 5.
 
@@ -149,8 +149,8 @@ Founders need no join screen; their private link opens straight to screen 5.
 
 ## In scope (v1)
 
-Event setup → juror capture (custom + default chips, sentiment, optional note) →
-founder consolidated, visual, anonymous feedback view → the two-way access model above.
+Event setup â†’ juror capture (custom + default chips, sentiment, optional note) â†’
+founder consolidated, visual, anonymous feedback view â†’ the two-way access model above.
 
 ## Out of scope (do NOT build)
 
@@ -159,23 +159,23 @@ founder consolidated, visual, anonymous feedback view → the two-way access mod
 - AI summarisation of feedback.
 - Scoring, ranking, or score normalisation.
 - Moderation / quality gates.
-- Peer/attendee feedback (→ stretch).
-- An "I'd like to connect" founder↔juror flag (→ stretch; strongest one, cheap once the
-  core loop works — consider only if time remains).
+- Peer/attendee feedback (â†’ stretch).
+- An "I'd like to connect" founderâ†”juror flag (â†’ stretch; strongest one, cheap once the
+  core loop works â€” consider only if time remains).
 
 ---
 
 ## Build order (always keep a working slice)
 
-1. **Skeleton + setup** — create an event, add pitches, generate the public event code
+1. **Skeleton + setup** â€” create an event, add pitches, generate the public event code
    and private per-pitch codes. Get it deployed somewhere early.
-2. **Capture screen (HERO #1)** — pitch list → pick a pitch → chips (default + add-custom,
-   sentiment) → optional note → submit.
-3. **Founder feedback view (HERO #2)** — open via private link → aggregated chip summary,
+2. **Capture screen (HERO #1)** â€” pitch list â†’ pick a pitch â†’ chips (default + add-custom,
+   sentiment) â†’ optional note â†’ submit.
+3. **Founder feedback view (HERO #2)** â€” open via private link â†’ aggregated chip summary,
    positive/negative read, notes feed, anonymous, good-looking. Core loop now demoable end to end.
-4. **Polish the two hero screens** — this is where the product wins or loses.
-5. **Stretch, in order** — peer feedback → connect flag.
-6. **Freeze + seed** — load realistic pitch names and plausible feedback, rehearse, stop building.
+4. **Polish the two hero screens** â€” this is where the product wins or loses.
+5. **Stretch, in order** â€” peer feedback â†’ connect flag.
+6. **Freeze + seed** â€” load realistic pitch names and plausible feedback, rehearse, stop building.
 
 ---
 
@@ -188,14 +188,14 @@ founder consolidated, visual, anonymous feedback view → the two-way access mod
 4. Open that founder's **private feedback page**: the scattered taps from several jurors
    become one clean, visual, anonymous summary.
 
-The scattered → consolidated transform is the moment. End on the founder screen.
+The scattered â†’ consolidated transform is the moment. End on the founder screen.
 
 ---
 
 ## Judging criteria it must hit
 
-- **Usefulness** — recovers feedback founders currently never get.
-- **Execution** — capture works at real pitch speed; the founder page genuinely looks good.
-- **Clarity** — one loop: capture → deliver. Nothing else on screen.
-- **Potential for real use** — built for this competition's exact format, runnable as-is,
+- **Usefulness** â€” recovers feedback founders currently never get.
+- **Execution** â€” capture works at real pitch speed; the founder page genuinely looks good.
+- **Clarity** â€” one loop: capture â†’ deliver. Nothing else on screen.
+- **Potential for real use** â€” built for this competition's exact format, runnable as-is,
   and the same tool works for any 1-on-1 VC pitch. Bigger market than it first looks.

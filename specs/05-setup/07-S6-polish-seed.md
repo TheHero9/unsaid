@@ -1,17 +1,17 @@
-# S6 - Polish both heroes + seed script + E2E smoke + FREEZE
+﻿# S6 - Polish both heroes + seed script + E2E smoke + FREEZE
 
-Status: ✅ Done (Vercel deploy + real-phone rehearsal handled by a separate session)
+Status: âœ… Done (Vercel deploy + real-phone rehearsal handled by a separate session)
 
-## 🎯 Goal
+## ðŸŽ¯ Goal
 
 "This is where the product wins or loses" - polish the two hero screens,
 load realistic demo data, smoke the whole loop, rehearse, STOP BUILDING.
 
-## 📋 Prerequisites
+## ðŸ“‹ Prerequisites
 
 - S5 done (core loop demoable)
 
-## ✅ Acceptance criteria
+## âœ… Acceptance criteria
 
 1. Polish pass on capture + founder screens: spacing, type hierarchy, touch
    feedback (active states), loading/pending states, any jank found in the
@@ -21,8 +21,8 @@ load realistic demo data, smoke the whole loop, rehearse, STOP BUILDING.
    believable mixed feedback (chips + notes) on at least 3 pitches - prints
    ALL codes (organizer, public, each private) to the console. Idempotent
    enough: each run creates a fresh event
-3. Playwright E2E smoke (`tests/e2e/core-loop.spec.ts`): create event → add
-   pitch → join as juror → capture chips + note → founder page shows them.
+3. Playwright E2E smoke (`tests/e2e/core-loop.spec.ts`): create event â†’ add
+   pitch â†’ join as juror â†’ capture chips + note â†’ founder page shows them.
    Runs against the dev server, green on chromium-desktop + chromium-mobile
 4. Access-model checks in the same spec: public event surface exposes no
    feedback; a wrong private code 404s
@@ -30,13 +30,13 @@ load realistic demo data, smoke the whole loop, rehearse, STOP BUILDING.
    phones against prod
 6. Anything tempting but new goes to `NEXT_TIME.md`, not into code
 
-## 📝 Prompt
+## ðŸ“ Prompt
 
 ```
 Read AGENTS.md, SPECS.md (Demo arc + judging criteria), and the S5 walk-through
 notes first.
 
-Execute setup step S6 for Unsaid per specs/05-setup/07-S6-polish-seed.md:
+Execute setup step S6 for Nondit per specs/05-setup/07-S6-polish-seed.md:
 
 1. Polish: review the capture screen and founder view against SPECS.md's
    hero descriptions on a 390px viewport. Fix hierarchy, spacing, tap
@@ -55,7 +55,7 @@ Execute setup step S6 for Unsaid per specs/05-setup/07-S6-polish-seed.md:
 Do not commit. Report with a confidence assessment.
 ```
 
-## 🧪 Verification
+## ðŸ§ª Verification
 
-- `npm run seed:demo` → open the printed founder code on a phone → page sells itself
+- `npm run seed:demo` â†’ open the printed founder code on a phone â†’ page sells itself
 - Full gate green; prod deploy rehearsed end to end (the demo arc from SPECS.md)

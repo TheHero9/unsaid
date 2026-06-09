@@ -12,5 +12,5 @@ export const JUROR_COOKIE_MAX_AGE = 60 * 60 * 24; // 24h in seconds
 
 /** Cookie name for a juror's identity within one event. */
 export function jurorCookieName(eventId: string): string {
-  return `unsaid_juror_${eventId}`;
+  return `nondit_juror_${eventId}`;
 }

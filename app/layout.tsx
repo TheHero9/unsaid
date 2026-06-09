@@ -15,8 +15,8 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: {
-    default: "Unsaid",
-    template: "%s | Unsaid",
+    default: "Nondit",
+    template: "%s | Nondit",
   },
   description:
     "The feedback founders never hear. Capture everything jurors notice during a pitch and deliver it as one clean, anonymous page.",

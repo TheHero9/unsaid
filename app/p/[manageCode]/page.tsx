@@ -122,7 +122,7 @@ export default async function FounderManagePage({
             href="/"
             className="text-sm text-muted-foreground underline-offset-4 hover:text-foreground hover:underline"
           >
-            Unsaid
+            Nondit
           </Link>
           <h1 className="text-2xl font-semibold tracking-tight text-balance">
             {pitch.name}

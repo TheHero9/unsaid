@@ -1,21 +1,21 @@
-# S2 - Organizer: create event, pitches, codes + QR
+﻿# S2 - Organizer: create event, pitches, codes + QR
 
-Status: ✅ Done
+Status: âœ… Done
 
-## 🎯 Goal
+## ðŸŽ¯ Goal
 
-The organizer flow end to end: create an event → add pitches → see the
+The organizer flow end to end: create an event â†’ add pitches â†’ see the
 shareable codes (public event code + per-pitch private codes + their QRs).
 
-## 📋 Prerequisites
+## ðŸ“‹ Prerequisites
 
 - S1 done (tables, codes, admin client)
 
-## ✅ Acceptance criteria
+## âœ… Acceptance criteria
 
-1. `/new`: form (name required; date, location optional) → server action
+1. `/new`: form (name required; date, location optional) â†’ server action
    creates `u_events` with both codes + seeds `DEFAULT_CHIPS` into `u_chips`
-   (created_by NULL) → redirects to `/o/<organizerCode>`
+   (created_by NULL) â†’ redirects to `/o/<organizerCode>`
 2. `/o/[organizerCode]`: 404 on unknown code. Shows:
    - event header (name, date, location)
    - add-pitch form (name required; description, slides https-URL, founder
@@ -29,13 +29,13 @@ shareable codes (public event code + per-pitch private codes + their QRs).
 5. Mobile-first; works on a phone; NO emojis in UI (lucide icons)
 6. `npm run typecheck` + `npm run lint` green
 
-## 📝 Prompt
+## ðŸ“ Prompt
 
 ```
 Read AGENTS.md, SPECS.md (Organizer setup flow), and
 specs/03-architecture/01-architecture.md first.
 
-Execute setup step S2 for Unsaid per specs/05-setup/03-S2-organizer.md:
+Execute setup step S2 for Nondit per specs/05-setup/03-S2-organizer.md:
 
 1. npm i qrcode and @types/qrcode (dev).
 2. /new - create-event form (react-hook-form + zod v4). Server action:
@@ -59,8 +59,8 @@ Do not commit. Run typecheck + lint and report. End with a confidence
 assessment per AGENTS.md.
 ```
 
-## 🧪 Verification
+## ðŸ§ª Verification
 
-- Create event on a phone viewport → add 3 pitches → all codes + QRs render
-- Wrong organizer code → 404
+- Create event on a phone viewport â†’ add 3 pitches â†’ all codes + QRs render
+- Wrong organizer code â†’ 404
 - `u_chips` has the default set for the new event

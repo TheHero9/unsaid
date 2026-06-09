@@ -1,4 +1,4 @@
-# Unsaid - Tech Stack (definitive)
+﻿# Nondit - Tech Stack (definitive)
 
 Same base stack as the remember-me app. **No Python worker** - this app has no
 media processing. Single Next.js deployable.
@@ -25,7 +25,7 @@ media processing. Single Next.js deployable.
 | E2E tests          | **Playwright** (chromium desktop + mobile)      | configured |
 | Hosting            | **Vercel**                                      | deploy early (S0) |
 
-## 🔑 Decisions & rationale
+## ðŸ”‘ Decisions & rationale
 
 1. **No Supabase Auth.** Jurors and founders have no login by product design.
    Adding magic-link auth only for organizers would add email dependency -
@@ -51,7 +51,7 @@ media processing. Single Next.js deployable.
    local component state + a server action. Don't add layers for a one-day
    build.
 
-## 🌐 Environment variables
+## ðŸŒ Environment variables
 
 ```bash
 NEXT_PUBLIC_APP_URL=http://localhost:3000

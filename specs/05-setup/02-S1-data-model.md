@@ -1,20 +1,20 @@
-# S1 - Data model: `u_*` migrations + codes + types
+﻿# S1 - Data model: `u_*` migrations + codes + types
 
-Status: ✅ Done
+Status: âœ… Done
 
-## 🎯 Goal
+## ðŸŽ¯ Goal
 
 All 5 `u_*` tables live in the shared Supabase project with RLS deny-all,
 code generators + the service-role client in `lib/`, TypeScript types
 regenerated, default-chips seeding ready for S2.
 
-## 📋 Prerequisites
+## ðŸ“‹ Prerequisites
 
 - S0 done
 - Supabase MCP connected (or fall back to `supabase/migrations/*.sql`)
 - `.env.local` filled: `SUPABASE_SERVICE_ROLE_KEY`, `NEXT_PUBLIC_SUPABASE_URL`
 
-## ✅ Acceptance criteria
+## âœ… Acceptance criteria
 
 1. Collision check ran first and was empty: `SELECT table_name FROM
    information_schema.tables WHERE table_schema='public' AND table_name
@@ -30,16 +30,16 @@ regenerated, default-chips seeding ready for S2.
    0/O/1/I) + `generatePrivateCode()` (14-char nanoid) via `customAlphabet`
 6. `lib/chips.ts` - `DEFAULT_CHIPS` array per the data-model spec
 7. Vitest: `lib/codes.test.ts` (length, alphabet, uniqueness over 10k) green
-8. Types regenerated → `lib/supabase/database.types.ts` filtered to `u_*`
+8. Types regenerated â†’ `lib/supabase/database.types.ts` filtered to `u_*`
 9. `npm run typecheck` + `npm run test` green
 
-## 📝 Prompt
+## ðŸ“ Prompt
 
 ```
 Read AGENTS.md, specs/03-architecture/01-architecture.md and
 specs/04-data-model/01-data-model.md first.
 
-Execute setup step S1 for Unsaid per specs/05-setup/02-S1-data-model.md:
+Execute setup step S1 for Nondit per specs/05-setup/02-S1-data-model.md:
 
 1. Run the u_% collision check against the shared Supabase project. STOP and
    report if non-empty.
@@ -62,8 +62,8 @@ Do not commit. Report: migration applied, advisor output, test results,
 typecheck.
 ```
 
-## 🧪 Verification
+## ðŸ§ª Verification
 
-- `npm run test` → codes tests green
+- `npm run test` â†’ codes tests green
 - Supabase: 6 `u_*` tables, RLS on, advisors clean (accepted notice aside)
 - Anon-key query against `u_events` returns zero rows / permission denied

@@ -33,7 +33,7 @@ export default function JoinPage() {
           <div className="mx-auto flex size-14 items-center justify-center rounded-2xl bg-secondary">
             <MessageSquareOff className="size-7 text-foreground" aria-hidden />
           </div>
-          <h1 className="text-4xl font-semibold tracking-tight">Unsaid</h1>
+          <h1 className="text-4xl font-semibold tracking-tight">Nondit</h1>
           <p className="text-balance text-muted-foreground">
             The feedback founders never hear.
           </p>

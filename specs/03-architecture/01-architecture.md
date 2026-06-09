@@ -1,10 +1,10 @@
-# Unsaid - Architecture
+﻿# Nondit - Architecture
 
 Single Next.js 16 app on Vercel. Supabase Postgres (shared project, `u_*`
 tables). No worker, no queues, no realtime infra - founder view refreshes on
 load (+ optional lightweight polling).
 
-## 🔑 Capability-token access model
+## ðŸ”‘ Capability-token access model
 
 Three code types, all minted server-side at creation time, all stored as
 plain unique columns (they are not passwords - they are unguessable URLs):
@@ -17,7 +17,7 @@ plain unique columns (they are not passwords - they are unguessable URLs):
 
 Rules:
 - Possession of a code IS the authorization. Every server action / route
-  handler resolves the code → row first, 404s on miss (404, not 403 - don't
+  handler resolves the code â†’ row first, 404s on miss (404, not 403 - don't
   confirm existence).
 - The public event surface NEVER joins onto feedback for reading.
 - Founder page queries are scoped by `pitch_id` resolved from `private_code`
@@ -25,10 +25,10 @@ Rules:
 - Code generation lives in `lib/codes.ts` as pure functions (vitest-covered),
   using `nanoid`'s `customAlphabet`.
 
-## 🧍 Juror identity (no login)
+## ðŸ§ Juror identity (no login)
 
-- On join: juror enters name → server action creates a `u_jurors` row →
-  sets an httpOnly cookie `unsaid_juror=<juror_id>` (uuid, per-browser).
+- On join: juror enters name â†’ server action creates a `u_jurors` row â†’
+  sets an httpOnly cookie `Nondit_juror=<juror_id>` (uuid, per-browser).
 - Subsequent capture calls read the cookie server-side and verify the juror
   belongs to the event being submitted to.
 - "Custom chips persist for that juror, that event" = chips rows keyed
@@ -37,13 +37,13 @@ Rules:
 - Lost cookie = rejoin under the same name (acceptable v1 trade-off; staff
   sees two juror rows, founder sees nothing different).
 
-## 🗺️ Routes
+## ðŸ—ºï¸ Routes
 
 ```
 /                          Landing: enter event code + "create event" link
 /new                       Organizer: create event form
 /o/[organizerCode]         Organizer dashboard: add/edit pitches, view codes + QRs
-/e/[eventCode]             Juror: join (name) → pitch list (same route, cookie-gated)
+/e/[eventCode]             Juror: join (name) â†’ pitch list (same route, cookie-gated)
 /e/[eventCode]/p/[pitchId] Juror: CAPTURE screen (HERO #1)
 /f/[privateCode]           Founder: feedback view (HERO #2)
 ```
@@ -54,7 +54,7 @@ Rules:
   not reading. Reading is exclusively behind `/f/[privateCode]`.
 - Dynamic metadata: founder page title = pitch name; never leak other pitches.
 
-## 📁 Code layout
+## ðŸ“ Code layout
 
 ```
 app/                      routes per the map above
@@ -70,7 +70,7 @@ lib/aggregate.ts          pure feedback aggregation for founder view (vitest)
 schemas/                  zod schemas per surface
 ```
 
-## 📊 Aggregation (founder view)
+## ðŸ“Š Aggregation (founder view)
 
 Pure function `aggregateFeedback(rows)` in `lib/aggregate.ts`:
 - group selected chips by **normalized label** (`lower(trim(label))`) across
@@ -81,7 +81,7 @@ Pure function `aggregateFeedback(rows)` in `lib/aggregate.ts`:
 - notes: newest first, no author info ever crosses this boundary - the
   founder-page query simply never selects juror columns
 
-## 🔒 RLS posture
+## ðŸ”’ RLS posture
 
 Every `u_*` table: `ENABLE ROW LEVEL SECURITY`, **zero policies**. The anon
 and authenticated roles can do nothing; only the service-role (server) can

@@ -1,6 +1,6 @@
-# Unsaid - Data Model
+﻿# Nondit - Data Model
 
-🚨 Shared Supabase project `ujuqwwfhoubgzgtmpuis` (with parking + workouts +
+ðŸš¨ Shared Supabase project `ujuqwwfhoubgzgtmpuis` (with parking + workouts +
 remember-me). **Every object prefixed `u_`** - tables, indexes, triggers,
 functions. Collision check before the first migration:
 
@@ -27,7 +27,7 @@ WHERE table_schema='public' AND table_name LIKE 'u\_%' ESCAPE '\';
 | column        | type        | notes |
 | ------------- | ----------- | ----- |
 | id            | uuid PK     | |
-| event_id      | uuid NOT NULL FK → u_events ON DELETE CASCADE | indexed |
+| event_id      | uuid NOT NULL FK â†’ u_events ON DELETE CASCADE | indexed |
 | name          | text NOT NULL | product name (required per brief) |
 | description   | text        | optional |
 | slides_url    | text        | optional, validate https on input |
@@ -40,7 +40,7 @@ WHERE table_schema='public' AND table_name LIKE 'u\_%' ESCAPE '\';
 | column     | type | notes |
 | ---------- | ---- | ----- |
 | id         | uuid PK | doubles as the cookie token |
-| event_id   | uuid NOT NULL FK → u_events ON DELETE CASCADE | indexed |
+| event_id   | uuid NOT NULL FK â†’ u_events ON DELETE CASCADE | indexed |
 | name       | text NOT NULL | |
 | created_at | timestamptz NOT NULL default now() | |
 
@@ -48,10 +48,10 @@ WHERE table_schema='public' AND table_name LIKE 'u\_%' ESCAPE '\';
 | column     | type | notes |
 | ---------- | ---- | ----- |
 | id         | uuid PK | |
-| event_id   | uuid NOT NULL FK → u_events ON DELETE CASCADE | indexed |
+| event_id   | uuid NOT NULL FK â†’ u_events ON DELETE CASCADE | indexed |
 | label      | text NOT NULL | |
 | sentiment  | text NOT NULL CHECK (sentiment IN ('positive','negative','neutral')) | |
-| created_by | uuid FK → u_jurors ON DELETE SET NULL | NULL = event default chip; indexed |
+| created_by | uuid FK â†’ u_jurors ON DELETE SET NULL | NULL = event default chip; indexed |
 | created_at | timestamptz NOT NULL default now() | |
 
 - UNIQUE index on `(event_id, lower(trim(label)))` - a juror "creating" an
@@ -61,16 +61,16 @@ WHERE table_schema='public' AND table_name LIKE 'u\_%' ESCAPE '\';
 | column     | type | notes |
 | ---------- | ---- | ----- |
 | id         | uuid PK | |
-| pitch_id   | uuid NOT NULL FK → u_pitches ON DELETE CASCADE | indexed |
-| juror_id   | uuid NOT NULL FK → u_jurors ON DELETE CASCADE | indexed |
+| pitch_id   | uuid NOT NULL FK â†’ u_pitches ON DELETE CASCADE | indexed |
+| juror_id   | uuid NOT NULL FK â†’ u_jurors ON DELETE CASCADE | indexed |
 | note       | text | optional one-liner; trim; NULL when empty |
 | created_at | timestamptz NOT NULL default now() | |
 
 ### `u_feedback_chips`
 | column      | type | notes |
 | ----------- | ---- | ----- |
-| feedback_id | uuid NOT NULL FK → u_feedback ON DELETE CASCADE | |
-| chip_id     | uuid NOT NULL FK → u_chips ON DELETE CASCADE | indexed |
+| feedback_id | uuid NOT NULL FK â†’ u_feedback ON DELETE CASCADE | |
+| chip_id     | uuid NOT NULL FK â†’ u_chips ON DELETE CASCADE | indexed |
 | PK          | (feedback_id, chip_id) | |
 
 ## Default chips (seeded per event on creation)
@@ -93,9 +93,9 @@ WHERE table_schema='public' AND table_name LIKE 'u\_%' ESCAPE '\';
 
 ## Integrity rules
 
-- A feedback submission must have ≥1 chip OR a non-empty note (enforce in the
+- A feedback submission must have â‰¥1 chip OR a non-empty note (enforce in the
   server action - not a DB constraint, keep v1 simple)
 - Juror must belong to the pitch's event - verify server-side on submit
 - RLS: ENABLE on all 5 tables, zero policies (service-role only)
-- Regenerate types after migrations → `lib/supabase/database.types.ts`,
+- Regenerate types after migrations â†’ `lib/supabase/database.types.ts`,
   filtered to `u_*`

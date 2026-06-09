@@ -31,11 +31,11 @@ import { LinkedInIcon } from "@/components/marketing/LinkedInIcon";
 const LINKEDIN_URL = "https://www.linkedin.com/in/demetrios-vlassis/";
 
 export const metadata: Metadata = {
-  title: "Unsaid - the feedback founders never get",
+  title: "Nondit - the feedback founders never get",
   description:
-    "During a pitch, jurors tap quick feedback chips, rate the pitch, and leave a one-line note. Unsaid merges it, strips the names, and gives the founder one clean, anonymous feedback page.",
+    "During a pitch, jurors tap quick feedback chips, rate the pitch, and leave a one-line note. Nondit merges it, strips the names, and gives the founder one clean, anonymous feedback page.",
   openGraph: {
-    title: "Unsaid - the feedback founders never get",
+    title: "Nondit - the feedback founders never get",
     description:
       "Recover the honest feedback every juror forms and never shares.",
     type: "website",
@@ -56,7 +56,7 @@ export default function LandingPage() {
       {/* Top bar */}
       <header className="sticky top-0 z-40 border-b border-border/60 bg-background/80 backdrop-blur">
         <div className="mx-auto flex h-14 w-full max-w-5xl items-center justify-between px-5">
-          <span className="text-lg font-semibold tracking-tight">Unsaid</span>
+          <span className="text-lg font-semibold tracking-tight">Nondit</span>
           <nav className="flex items-center gap-2 sm:gap-5">
             <Link
               href="#how"
@@ -88,7 +88,7 @@ export default function LandingPage() {
           </h1>
           <p className="mt-6 max-w-xl text-balance text-lg text-muted-foreground">
             Every juror forms a real, honest opinion during a pitch - then
-            softens it, or keeps it to themselves. Unsaid recovers the feedback
+            softens it, or keeps it to themselves. Nondit recovers the feedback
             that usually goes{" "}
             <span className="font-medium text-foreground underline decoration-foreground/30 decoration-2 underline-offset-4">
               unsaid
@@ -178,7 +178,7 @@ export default function LandingPage() {
             </h2>
             <p className="text-balance text-lg text-muted-foreground">
               Built to rank startups and pick a winner - for the organizer.
-              Unsaid is the opposite. It ignores ranking and hands the feedback
+              Nondit is the opposite. It ignores ranking and hands the feedback
               back to the founder.
             </p>
             <div className="flex flex-wrap items-center justify-center gap-3 pt-2 text-sm">
@@ -240,7 +240,7 @@ export default function LandingPage() {
               tag="Model B"
               icon={<UserRound className="size-5" aria-hidden />}
               title="The founder brings it"
-              summary="No organizer needed. A founder can use Unsaid at any pitch, even one where nobody set anything up."
+              summary="No organizer needed. A founder can use Nondit at any pitch, even one where nobody set anything up."
               steps={[
                 {
                   icon: <CalendarPlus className="size-4" aria-hidden />,
@@ -307,7 +307,7 @@ export default function LandingPage() {
       {/* Footer */}
       <footer className="border-t border-border">
         <div className="mx-auto flex w-full max-w-5xl flex-col items-center justify-between gap-4 px-5 py-8 text-sm text-muted-foreground sm:flex-row">
-          <span className="font-semibold text-foreground">Unsaid</span>
+          <span className="font-semibold text-foreground">Nondit</span>
           <div className="flex items-center gap-5">
             <a
               href={LINKEDIN_URL}
@@ -322,7 +322,7 @@ export default function LandingPage() {
               Join an event
             </Link>
           </div>
-          <span>© 2026 Unsaid</span>
+          <span>© 2026 Nondit</span>
         </div>
       </footer>
     </div>

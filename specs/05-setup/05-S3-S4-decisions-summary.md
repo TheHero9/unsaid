@@ -1,16 +1,16 @@
-# S3 + S4 - Decisions Summary (juror join, pitch list, capture screen)
+﻿# S3 + S4 - Decisions Summary (juror join, pitch list, capture screen)
 
-Status: ✅ Done - branch `20260607-s3-s4-juror-capture`
+Status: âœ… Done - branch `20260607-s3-s4-juror-capture`
 
 ## Cookie convention (juror identity)
 
-- **Per-event cookie**, not a single global one. Name: `unsaid_juror_<event_id>`
+- **Per-event cookie**, not a single global one. Name: `Nondit_juror_<event_id>`
   (helper: `jurorCookieName(eventId)` in `lib/cookies.ts`). Value = `u_jurors.id`.
 - Attributes: `httpOnly: true`, `path: "/"`, `sameSite: "lax"`,
   `secure` only in production (so it works on `http://localhost`),
   `maxAge: 86400` (24h, `JUROR_COOKIE_MAX_AGE`).
 - **Deviation from `specs/03-architecture/01-architecture.md`** which described a
-  single `unsaid_juror=<juror_id>` cookie. The S3 step file and data model both
+  single `Nondit_juror=<juror_id>` cookie. The S3 step file and data model both
   scope a juror to exactly one event (`u_jurors.event_id`), so a per-event cookie
   lets one browser hold a distinct identity per event without collisions, and
   every read is verified with `.eq("event_id", event.id)`. This is the safer,
@@ -22,7 +22,7 @@ Status: ✅ Done - branch `20260607-s3-s4-juror-capture`
   `u_feedback_chips` for reading. The only references are INSERT/DELETE inside
   the capture submit action. Reading stays exclusively behind `/f/[privateCode]`.
 - Every server action re-resolves the capability triangle server-side:
-  event (from `public_code`) → juror (from the per-event cookie) → pitch
+  event (from `public_code`) â†’ juror (from the per-event cookie) â†’ pitch
   (`.eq("event_id", event.id)`). Client-supplied ids are never trusted for authz.
   `resolveContext()` returns null on any failure and does not leak which leg failed.
 

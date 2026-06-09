@@ -1,4 +1,4 @@
--- Unsaid - initial schema (u_* prefix, shared Supabase project)
+-- Nondit - initial schema (u_* prefix, shared Supabase project)
 -- RLS: ENABLED on every table with ZERO policies (deny-all) - deliberate.
 -- All access is server-side via the service-role client; authorization is
 -- capability codes. See specs/02-tech-stack/01-tech-stack.md.

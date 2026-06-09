@@ -1,5 +1,5 @@
 /**
- * TypeScript types for the `u_*` tables (Unsaid) in the shared Supabase
+ * TypeScript types for the `u_*` tables (Nondit) in the shared Supabase
  * project. Filtered to this app's prefix only - other tables in the project
  * belong to other apps and must never be referenced here.
  *
