@@ -2,10 +2,10 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
 
-import { CreateEventForm } from "@/components/organizer/CreateEventForm";
+import { CreateFlowChooser } from "@/components/founder/CreateFlowChooser";
 
 export const metadata: Metadata = {
-  title: "Create event",
+  title: "Get started",
 };
 
 export default function NewEventPage() {
@@ -22,16 +22,15 @@ export default function NewEventPage() {
           </Link>
           <div className="space-y-1.5">
             <h1 className="text-2xl font-semibold tracking-tight">
-              Create an event
+              Get started
             </h1>
             <p className="text-balance text-sm text-muted-foreground">
-              An event holds your pitches. You will get a public code for the
-              jury and a private link for each founder.
+              How are you running this pitch?
             </p>
           </div>
         </div>
 
-        <CreateEventForm />
+        <CreateFlowChooser />
       </div>
     </main>
   );

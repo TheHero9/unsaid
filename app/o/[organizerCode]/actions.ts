@@ -143,6 +143,7 @@ export async function deletePitchAction(
   }
 
   revalidatePath(`/o/${organizer_code}`);
+  revalidatePath(`/p/${organizer_code}`);
   return { ok: true };
 }
 
@@ -193,6 +194,7 @@ export async function addEventChipAction(
   }
 
   revalidatePath(`/o/${organizer_code}`);
+  revalidatePath(`/p/${organizer_code}`);
   return { ok: true };
 }
 
@@ -229,6 +231,7 @@ export async function deleteEventChipAction(
   }
 
   revalidatePath(`/o/${organizer_code}`);
+  revalidatePath(`/p/${organizer_code}`);
   return { ok: true };
 }
 
@@ -276,6 +279,7 @@ export async function addEventCriterionAction(
   }
 
   revalidatePath(`/o/${organizer_code}`);
+  revalidatePath(`/p/${organizer_code}`);
   return { ok: true };
 }
 
@@ -311,5 +315,6 @@ export async function deleteEventCriterionAction(
   }
 
   revalidatePath(`/o/${organizer_code}`);
+  revalidatePath(`/p/${organizer_code}`);
   return { ok: true };
 }

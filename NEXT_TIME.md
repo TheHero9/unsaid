@@ -45,6 +45,18 @@ Ideas and tasks deferred to a later stage. Grouped by topic.
 - **Reference:** SPECS.md "Delivery of the private link is staff's choice"
 - **Dependencies:** an email provider decision (out of v1)
 
+## Founder flow (Flow B) - link recovery
+
+- **Date added:** 2026-06-09
+- **Context:** designing Flow B (founder self-serve), `specs/06-flows/01-two-flows.md`
+- **Deferred:**
+  - Proper recovery for a founder's private feedback link - there is NO login in
+    v1, so a founder who loses their link is locked out forever. v1 stopgap is a
+    prominent "save / screenshot this link" warning on the share screen. A real
+    fix = email the link on creation, or a lightweight founder account.
+- **Reference:** specs/06-flows/01-two-flows.md (decisions 3 + known limitation)
+- **Dependencies:** an email provider decision (same blocker as organizer email delivery)
+
 ## Engineering hardening
 
 - **Date added:** 2026-06-07
