@@ -12,6 +12,7 @@
 import { createClient } from "@supabase/supabase-js";
 
 import { DEFAULT_CHIPS } from "../lib/chips";
+import { DEFAULT_CRITERIA } from "../lib/criteria";
 import { generatePrivateCode, generatePublicCode } from "../lib/codes";
 import type { Database } from "../lib/supabase/database.types";
 
@@ -116,6 +117,15 @@ async function main() {
     )
     .select();
   if (chipsErr || !chips) throw chipsErr ?? new Error("chips insert failed");
+
+  // 2b. Default rating criteria (event-wide)
+  const { error: criteriaErr } = await db.from("u_criteria").insert(
+    DEFAULT_CRITERIA.map((c) => ({
+      event_id: event.id,
+      label: c.label,
+    }))
+  );
+  if (criteriaErr) throw criteriaErr;
 
   // 3. Pitches
   const { data: pitches, error: pitchErr } = await db

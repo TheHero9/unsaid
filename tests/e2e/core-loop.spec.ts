@@ -23,6 +23,8 @@ test("core loop: organizer → two jurors capture → founder sees merged anonym
 }) => {
   // ---- Organizer: create event ------------------------------------------
   await page.goto("/new");
+  // /new forks (organizer vs founder) - pick the organizer path first.
+  await page.getByRole("button", { name: "I'm running an event" }).click();
   await page.locator("#name").fill("E2E Demo Day");
   await page.locator("#location").fill("Test Hall");
   await page.getByRole("button", { name: "Create event" }).click();

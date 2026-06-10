@@ -5,6 +5,7 @@ import { redirect } from "next/navigation";
 import { getAdminClient } from "@/lib/supabase/admin";
 import { generatePublicCode, generatePrivateCode } from "@/lib/codes";
 import { DEFAULT_CHIPS } from "@/lib/chips";
+import { DEFAULT_CRITERIA } from "@/lib/criteria";
 import { createEventSchema, type CreateEventInput } from "@/schemas/event";
 import {
   createFounderPitchSchema,
@@ -83,6 +84,22 @@ export async function createEventAction(
       };
     }
 
+    // Seed default rating criteria (created_by NULL = event-wide).
+    const { error: criteriaError } = await admin.from("u_criteria").insert(
+      DEFAULT_CRITERIA.map((criterion) => ({
+        event_id: event.id,
+        label: criterion.label,
+        created_by: null,
+      }))
+    );
+
+    if (criteriaError) {
+      return {
+        ok: false,
+        error: "Event created but seeding criteria failed. Please try again.",
+      };
+    }
+
     organizerCodeForRedirect = event.organizer_code;
     break;
   }
@@ -158,6 +175,22 @@ export async function createFounderEventAction(
       return {
         ok: false,
         error: "Pitch created but seeding chips failed. Please try again.",
+      };
+    }
+
+    // Seed default rating criteria (created_by NULL = event-wide).
+    const { error: criteriaError } = await admin.from("u_criteria").insert(
+      DEFAULT_CRITERIA.map((criterion) => ({
+        event_id: event.id,
+        label: criterion.label,
+        created_by: null,
+      }))
+    );
+
+    if (criteriaError) {
+      return {
+        ok: false,
+        error: "Pitch created but seeding criteria failed. Please try again.",
       };
     }
 

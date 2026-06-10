@@ -91,7 +91,7 @@ export default function LandingPage() {
             softens it, or keeps it to themselves. Nondit recovers the feedback
             that usually goes{" "}
             <span className="font-medium text-foreground underline decoration-foreground/30 decoration-2 underline-offset-4">
-              unsaid
+              unspoken
             </span>
             .
           </p>

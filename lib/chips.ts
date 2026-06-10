@@ -11,15 +11,21 @@ export interface DefaultChip {
 }
 
 export const DEFAULT_CHIPS: readonly DefaultChip[] = [
-  { label: "unclear ask", sentiment: "negative" },
-  { label: "weak market size", sentiment: "negative" },
-  { label: "rushed delivery", sentiment: "negative" },
-  { label: "too much jargon", sentiment: "negative" },
+  // Positive - what landed
+  { label: "clear problem", sentiment: "positive" },
+  { label: "big market", sentiment: "positive" },
   { label: "strong traction", sentiment: "positive" },
   { label: "great team", sentiment: "positive" },
-  { label: "good demo", sentiment: "positive" },
-  { label: "confident", sentiment: "positive" },
-  { label: "clear problem", sentiment: "positive" },
-  { label: "memorable", sentiment: "neutral" },
+  { label: "compelling demo", sentiment: "positive" },
+  // Negative - what hurt
+  { label: "unclear ask", sentiment: "negative" },
+  { label: "weak market size", sentiment: "negative" },
+  { label: "crowded market", sentiment: "negative" },
+  { label: "shaky numbers", sentiment: "negative" },
+  { label: "too much jargon", sentiment: "negative" },
+  { label: "rushed delivery", sentiment: "negative" },
+  // Neutral - observations
   { label: "bold claim", sentiment: "neutral" },
+  { label: "memorable", sentiment: "neutral" },
+  { label: "needs focus", sentiment: "neutral" },
 ] as const;
