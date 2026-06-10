@@ -1,12 +1,13 @@
 import type { Metadata } from "next";
 import { cookies } from "next/headers";
+import { redirect } from "next/navigation";
+import { Inbox } from "lucide-react";
 
 import { getAdminClient } from "@/lib/supabase/admin";
 import { jurorCookieName } from "@/lib/cookies";
 
 import { EventNotFound } from "./EventNotFound";
-import { JoinCard } from "./JoinCard";
-import { PitchRow } from "./PitchRow";
+import { JoinGate } from "./JoinGate";
 
 interface PageParams {
   params: Promise<{ eventCode: string }>;
@@ -48,71 +49,57 @@ export default async function JurorEventPage({ params }: PageParams) {
     return <EventNotFound attemptedCode={normalizedCode} />;
   }
 
-  // Verify the juror cookie: the row must exist AND belong to THIS event.
-  const cookieStore = await cookies();
-  const jurorId = cookieStore.get(jurorCookieName(event.id))?.value;
-
   const admin = getAdminClient();
 
-  let juror: { id: string; name: string } | null = null;
-  if (jurorId) {
-    const { data } = await admin
-      .from("u_jurors")
-      .select("id, name")
-      .eq("id", jurorId)
-      .eq("event_id", event.id)
-      .maybeSingle();
-    juror = data;
-  }
-
-  if (!juror) {
-    return <JoinCard eventCode={normalizedCode} eventName={event.name} />;
-  }
-
-  // Pitch list. NOTE: this surface NEVER reads feedback - only pitches.
-  const { data: pitches } = await admin
+  // First pitch (running order) - where a joined juror lands.
+  const { data: pitchRows } = await admin
     .from("u_pitches")
-    .select("id, name, description, slides_url, position")
+    .select("id, position")
     .eq("event_id", event.id)
     .order("position", { ascending: true })
     .order("created_at", { ascending: true });
+  const firstPitchId = pitchRows?.[0]?.id ?? null;
 
-  const rows = pitches ?? [];
+  // Already joined (valid cookie)? Go straight to capture.
+  const cookieStore = await cookies();
+  const jurorId = cookieStore.get(jurorCookieName(event.id))?.value;
+  let joined = false;
+  if (jurorId) {
+    const { data } = await admin
+      .from("u_jurors")
+      .select("id")
+      .eq("id", jurorId)
+      .eq("event_id", event.id)
+      .maybeSingle();
+    joined = Boolean(data);
+  }
 
-  return (
-    <main className="mx-auto flex w-full max-w-md flex-1 flex-col px-4 pb-10 pt-8">
-      <header className="space-y-1 px-1">
-        <h1 className="text-2xl font-semibold tracking-tight text-balance">
+  if (joined && firstPitchId) {
+    redirect(`/e/${normalizedCode}/p/${firstPitchId}`);
+  }
+
+  if (joined && !firstPitchId) {
+    return (
+      <main className="flex min-h-[100dvh] flex-1 flex-col items-center justify-center px-6 text-center">
+        <div className="flex size-14 items-center justify-center rounded-2xl bg-surface-2">
+          <Inbox className="size-7 text-text-3" aria-hidden />
+        </div>
+        <h1 className="mt-5 font-serif text-2xl font-semibold text-text">
           {event.name}
         </h1>
-        <p className="text-sm text-muted-foreground">
-          You&apos;re giving feedback as{" "}
-          <span className="font-medium text-foreground">{juror.name}</span>
+        <p className="mt-2 max-w-xs text-sm text-text-3">
+          No pitches have been added to this event yet. Check back once the
+          organizer adds them.
         </p>
-      </header>
+      </main>
+    );
+  }
 
-      <p className="mt-6 px-1 text-sm font-medium text-muted-foreground">
-        Tap the pitch being presented now
-      </p>
-
-      {rows.length === 0 ? (
-        <div className="mt-3 rounded-xl border border-dashed border-border px-4 py-10 text-center text-sm text-muted-foreground">
-          No pitches have been added to this event yet.
-        </div>
-      ) : (
-        <ul className="mt-3 space-y-2">
-          {rows.map((pitch) => (
-            <PitchRow
-              key={pitch.id}
-              eventCode={normalizedCode}
-              pitchId={pitch.id}
-              name={pitch.name}
-              description={pitch.description}
-              slidesUrl={pitch.slides_url}
-            />
-          ))}
-        </ul>
-      )}
-    </main>
+  return (
+    <JoinGate
+      eventCode={normalizedCode}
+      eventName={event.name}
+      firstPitchId={firstPitchId}
+    />
   );
 }

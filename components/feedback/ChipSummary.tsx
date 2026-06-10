@@ -1,87 +1,58 @@
 import type { ChipCount } from "@/lib/aggregate";
 import type { ChipSentiment } from "@/lib/chips";
 
+import { SectionLabel } from "./SectionLabel";
+
 interface ChipSummaryProps {
   chipCounts: ChipCount[];
 }
 
-const SENTIMENT_STYLES: Record<
-  ChipSentiment,
-  { bar: string; track: string; count: string }
-> = {
-  positive: {
-    bar: "bg-chip-positive",
-    track: "bg-chip-positive-muted",
-    count: "text-chip-positive",
-  },
-  negative: {
-    bar: "bg-chip-negative",
-    track: "bg-chip-negative-muted",
-    count: "text-chip-negative",
-  },
-  neutral: {
-    bar: "bg-chip-neutral",
-    track: "bg-chip-neutral-muted",
-    count: "text-chip-neutral",
-  },
+const FILL: Record<ChipSentiment, string> = {
+  positive: "bg-pos-wash border-pos",
+  negative: "bg-neg-wash border-neg",
+  neutral: "bg-neu-wash border-neu",
+};
+
+const TONE: Record<ChipSentiment, string> = {
+  positive: "text-pos",
+  negative: "text-neg",
+  neutral: "text-neu",
 };
 
 /**
- * THE STAR of the founder page. Each used chip becomes a sentiment-coloured
- * horizontal bar whose width is proportional to how many jurors selected it.
- * Most-used first; the top item reads big and confident ("5 - unclear ask").
+ * THE STAR of the founder page. Each used chip becomes a horizontal bar whose
+ * fill width is proportional to how many jurors selected it, in the chip's
+ * sentiment colour. Most-used first.
  */
 export function ChipSummary({ chipCounts }: ChipSummaryProps) {
-  const maxCount = chipCounts.reduce(
-    (max, chip) => Math.max(max, chip.jurorCount),
-    0
-  );
+  if (chipCounts.length === 0) return null;
+
+  const max = chipCounts.reduce((m, c) => Math.max(m, c.jurorCount), 1);
 
   return (
-    <section aria-label="What jurors noticed" className="space-y-3">
-      <h2 className="text-sm font-medium text-muted-foreground">
-        What jurors noticed
-      </h2>
-
-      <ul className="space-y-2.5">
-        {chipCounts.map((chip, index) => {
-          const styles = SENTIMENT_STYLES[chip.sentiment];
-          const widthPct =
-            maxCount > 0 ? Math.max((chip.jurorCount / maxCount) * 100, 8) : 0;
-          const isTop = index === 0;
-
+    <section aria-label="What jurors noticed">
+      <SectionLabel>What jurors noticed</SectionLabel>
+      <ul className="flex flex-col gap-2">
+        {chipCounts.map((chip) => {
+          const width = Math.max((chip.jurorCount / max) * 100, 6);
           return (
             <li
               key={`${chip.label}-${chip.sentiment}`}
-              className="relative overflow-hidden rounded-xl ring-1 ring-foreground/10"
+              className="nondit-bar-in relative flex h-[46px] items-center gap-[11px] overflow-hidden rounded-xl border border-border bg-surface"
             >
-              {/* Proportional fill behind the label. */}
               <div
-                className={`absolute inset-y-0 left-0 ${styles.track}`}
-                style={{ width: `${widthPct}%` }}
                 aria-hidden
+                className={`absolute inset-y-0 left-0 border-r-2 ${FILL[chip.sentiment]}`}
+                style={{ width: `${width}%` }}
               />
-              <div
-                className={`absolute inset-y-0 left-0 w-1 ${styles.bar}`}
-                aria-hidden
-              />
-
-              <div className="relative flex items-center gap-3 px-4 py-3">
-                <span
-                  className={`${styles.count} ${
-                    isTop ? "text-2xl" : "text-lg"
-                  } font-bold tabular-nums leading-none`}
-                >
-                  {chip.jurorCount}
-                </span>
-                <span
-                  className={`${
-                    isTop ? "text-base font-medium" : "text-sm"
-                  } text-foreground`}
-                >
-                  {chip.label}
-                </span>
-              </div>
+              <span
+                className={`relative ml-[14px] min-w-[14px] font-mono text-[14px] font-bold tabular-nums ${TONE[chip.sentiment]}`}
+              >
+                {chip.jurorCount}
+              </span>
+              <span className="relative text-[14.5px] font-medium text-text">
+                {chip.label}
+              </span>
             </li>
           );
         })}

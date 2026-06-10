@@ -1,5 +1,3 @@
-import { Minus } from "lucide-react";
-
 interface SentimentBarProps {
   positiveCount: number;
   negativeCount: number;
@@ -7,64 +5,42 @@ interface SentimentBarProps {
 }
 
 /**
- * One glanceable positive-vs-negative read. The bar shows the share of positive
- * (green, from the left) vs negative (red) chip SELECTIONS; neutral is excluded
- * from the ratio and noted underneath. Handles the 0-positive + 0-negative case
- * gracefully (neutral-only or nothing-yet).
+ * Compact at-a-glance read: one proportional stacked bar of positive / neutral
+ * / critical chip SELECTIONS, with the counts beneath. No verdict sentence -
+ * the bar speaks for itself.
  */
 export function SentimentBar({
   positiveCount,
   negativeCount,
   neutralCount,
 }: SentimentBarProps) {
-  const ratioTotal = positiveCount + negativeCount;
-  const hasRatio = ratioTotal > 0;
-  const positiveShare = hasRatio ? (positiveCount / ratioTotal) * 100 : 0;
-  const negativeShare = hasRatio ? 100 - positiveShare : 0;
+  const total = positiveCount + neutralCount + negativeCount || 1;
+  const pct = (n: number) => `${(n / total) * 100}%`;
 
   return (
-    <section aria-label="Overall sentiment" className="space-y-3">
-      <h2 className="text-sm font-medium text-muted-foreground">
-        Overall read
-      </h2>
-
-      {hasRatio ? (
-        <div className="space-y-2">
-          <div className="flex items-baseline justify-between text-sm">
-            <span className="font-semibold text-chip-positive tabular-nums">
-              {positiveCount} positive
-            </span>
-            <span className="font-semibold text-chip-negative tabular-nums">
-              {negativeCount} negative
-            </span>
-          </div>
-
-          <div
-            className="flex h-3 w-full overflow-hidden rounded-full bg-secondary"
-            role="img"
-            aria-label={`${positiveCount} positive and ${negativeCount} negative selections`}
-          >
-            <div
-              className="h-full bg-chip-positive"
-              style={{ width: `${positiveShare}%` }}
-            />
-            <div
-              className="h-full bg-chip-negative"
-              style={{ width: `${negativeShare}%` }}
-            />
-          </div>
-        </div>
-      ) : (
-        <div className="flex h-3 w-full overflow-hidden rounded-full bg-secondary" />
-      )}
-
-      {neutralCount > 0 && (
-        <p className="flex items-center gap-1.5 text-xs text-muted-foreground">
-          <Minus className="size-3.5 text-chip-neutral" aria-hidden />
-          {neutralCount} neutral observation{neutralCount === 1 ? "" : "s"} (not
-          scored)
-        </p>
-      )}
+    <section aria-label="Overall read" className="space-y-2.5">
+      <div
+        className="flex h-3 gap-0.5 overflow-hidden rounded-full bg-surface-3"
+        role="img"
+        aria-label={`${positiveCount} positive, ${neutralCount} neutral, ${negativeCount} critical selections`}
+      >
+        {positiveCount > 0 && (
+          <span className="h-full bg-pos" style={{ width: pct(positiveCount) }} />
+        )}
+        {neutralCount > 0 && (
+          <span className="h-full bg-neu" style={{ width: pct(neutralCount) }} />
+        )}
+        {negativeCount > 0 && (
+          <span className="h-full bg-neg" style={{ width: pct(negativeCount) }} />
+        )}
+      </div>
+      <div className="flex justify-between text-[12px] font-semibold tabular-nums">
+        <span className="text-pos">{positiveCount} positive</span>
+        {neutralCount > 0 && (
+          <span className="text-neu">{neutralCount} neutral</span>
+        )}
+        <span className="text-neg">{negativeCount} critical</span>
+      </div>
     </section>
   );
 }

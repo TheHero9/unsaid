@@ -6,10 +6,10 @@ import { getAdminClient } from "@/lib/supabase/admin";
 import { jurorCookieName } from "@/lib/cookies";
 import {
   CaptureScreen,
+  type CaptureChip,
   type CaptureCriterion,
+  type CapturePitch,
 } from "@/components/capture/CaptureScreen";
-import type { CaptureChip } from "@/components/capture/ChipsGrid";
-import type { JurorSubmission } from "@/components/capture/YourSubmissions";
 
 interface PageParams {
   params: Promise<{ eventCode: string; pitchId: string }>;
@@ -66,14 +66,22 @@ export default async function CapturePage({ params }: PageParams) {
     .maybeSingle();
   if (!juror) redirect(`/e/${normalizedCode}`);
 
-  // Pitch must belong to this event.
-  const { data: pitch } = await admin
+  // All pitches for the event - the switcher needs the full set.
+  const { data: pitchRows } = await admin
     .from("u_pitches")
-    .select("id, name")
-    .eq("id", pitchId)
+    .select("id, name, description, position")
     .eq("event_id", event.id)
-    .maybeSingle();
-  if (!pitch) notFound();
+    .order("position", { ascending: true })
+    .order("created_at", { ascending: true });
+
+  const pitches: CapturePitch[] = (pitchRows ?? []).map((p) => ({
+    id: p.id,
+    name: p.name,
+    description: p.description,
+  }));
+
+  // The requested pitch must belong to this event.
+  if (!pitches.some((p) => p.id === pitchId)) notFound();
 
   // Chips: event defaults (created_by IS NULL) + this juror's own chips.
   const { data: chipRows } = await admin
@@ -104,44 +112,25 @@ export default async function CapturePage({ params }: PageParams) {
     label: c.label,
   }));
 
-  // This juror's OWN submissions for this pitch only - never anyone else's.
+  // Which pitches this juror has already submitted (for the progress strip +
+  // jump-sheet checks). Only this juror's own rows - never anyone else's.
   const { data: feedbackRows } = await admin
     .from("u_feedback")
-    .select(
-      "id, note, created_at, u_feedback_chips(u_chips(id, label, sentiment)), u_feedback_ratings(score, u_criteria(id, label))"
-    )
-    .eq("pitch_id", pitch.id)
-    .eq("juror_id", juror.id)
-    .order("created_at", { ascending: false });
+    .select("pitch_id")
+    .eq("juror_id", juror.id);
 
-  const submissions: JurorSubmission[] = (feedbackRows ?? []).map((row) => ({
-    id: row.id,
-    note: row.note,
-    createdAt: row.created_at,
-    chips: row.u_feedback_chips
-      .map((fc) => fc.u_chips)
-      .filter((c) => c !== null),
-    ratings: row.u_feedback_ratings.flatMap((fr) =>
-      fr.u_criteria
-        ? [
-            {
-              criterionId: fr.u_criteria.id,
-              label: fr.u_criteria.label,
-              score: fr.score,
-            },
-          ]
-        : []
-    ),
-  }));
+  const submittedPitchIds = Array.from(
+    new Set((feedbackRows ?? []).map((f) => f.pitch_id))
+  );
 
   return (
     <CaptureScreen
       eventCode={normalizedCode}
-      pitchId={pitch.id}
-      pitchName={pitch.name}
-      initialChips={chips}
-      initialCriteria={criteria}
-      submissions={submissions}
+      pitches={pitches}
+      initialPitchId={pitchId}
+      chips={chips}
+      criteria={criteria}
+      submittedPitchIds={submittedPitchIds}
     />
   );
 }

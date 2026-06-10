@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Nondit — Redesign Prototype</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:opsz,wght@6..72,500;6..72,600&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet" />
+<style>
+  :root {
+    --bg: #0a0a0c;
+    --surface: #131316;
+    --surface-2: #18181d;
+    --surface-3: #212128;
+    --border: rgba(255,255,255,0.08);
+    --border-2: rgba(255,255,255,0.14);
+    --border-strong: rgba(255,255,255,0.22);
+    --text: #fafafa;
+    --text-2: #b6b6c0;
+    --text-3: #84848f;
+    --text-4: #57575f;
+    --pos: #4ade80; --pos-wash: rgba(74,222,128,0.12); --pos-bd: rgba(74,222,128,0.42); --pos-faint: rgba(74,222,128,0.22);
+    --neg: #f87171; --neg-wash: rgba(248,113,113,0.12); --neg-bd: rgba(248,113,113,0.42); --neg-faint: rgba(248,113,113,0.22);
+    --neu: #60a5fa; --neu-wash: rgba(96,165,250,0.12); --neu-bd: rgba(96,165,250,0.42); --neu-faint: rgba(96,165,250,0.22);
+    --serif: "Newsreader", Georgia, serif;
+    --mono: "JetBrains Mono", ui-monospace, monospace;
+    --ease: cubic-bezier(.2,.8,.2,1);
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; height: 100%; }
+  body {
+    background: #060608;
+    background-image: radial-gradient(1100px 700px at 50% -10%, #101015, #060608 60%);
+    color: var(--text);
+    font-family: "Inter", -apple-system, system-ui, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    min-height: 100%;
+  }
+  #root { min-height: 100%; }
+
+  .stage {
+    min-height: 100vh;
+    display: flex; flex-direction: column; align-items: center;
+    padding: 26px 18px 48px;
+  }
+
+  /* ── prototype chrome ── */
+  .chrome { width: 100%; max-width: 430px; margin-bottom: 22px; }
+  .brand { display: flex; align-items: center; gap: 11px; margin-bottom: 18px; }
+  .brand-mark {
+    width: 38px; height: 38px; border-radius: 11px; flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center;
+    font-family: var(--serif); font-weight: 600; font-size: 22px; color: var(--bg);
+    background: var(--text);
+  }
+  .brand-name { font-size: 17px; font-weight: 700; letter-spacing: -0.01em; }
+  .brand-sub { font-size: 12.5px; color: var(--text-3); margin-top: 1px; }
+
+  .rolebar {
+    display: flex; gap: 4px; padding: 4px;
+    background: var(--surface); border: 1px solid var(--border); border-radius: 14px;
+  }
+
+  .ctx { display: flex; align-items: center; gap: 12px; margin-top: 13px; padding: 0 4px; }
+  .ctx.col { flex-direction: column; align-items: flex-start; gap: 9px; }
+  .ctx-text { font-size: 12.5px; line-height: 1.45; color: var(--text-3); flex: 1; }
+  .ctx-btn {
+    flex-shrink: 0; padding: 6px 12px; border-radius: 9px; cursor: pointer;
+    font: inherit; font-size: 12.5px; font-weight: 600; color: var(--text-2);
+    background: var(--surface-2); border: 1px solid var(--border-2);
+  }
+  .ctx-btn:hover { color: var(--text); }
+  .pitchpick { display: flex; flex-wrap: wrap; gap: 6px; }
+  .pp {
+    padding: 6px 11px; border-radius: 999px; cursor: pointer; font: inherit;
+    font-size: 12.5px; font-weight: 500; color: var(--text-3);
+    background: var(--surface-2); border: 1px solid var(--border);
+    transition: all .14s;
+  }
+  .pp:hover { color: var(--text-2); }
+  .pp.on { color: var(--text); background: var(--surface-3); border-color: var(--border-2); }
+  .pp-empty { color: var(--text-4); }
+
+  /* ── device ── */
+  .device-wrap { filter: drop-shadow(0 40px 90px rgba(0,0,0,0.6)); }
+  .phone-root { position: relative; height: 100%; background: var(--bg); overflow: hidden; }
+
+  /* scrollbars */
+  .scroll::-webkit-scrollbar { width: 0; height: 0; }
+  .scroll { scrollbar-width: none; }
+
+  /* ── animations ── */
+  .live-dot {
+    width: 7px; height: 7px; border-radius: 999px; background: var(--neg);
+    box-shadow: 0 0 0 0 rgba(248,113,113,0.55);
+    animation: pulse 1.8s var(--ease) infinite; flex-shrink: 0;
+  }
+  @keyframes pulse {
+    0% { box-shadow: 0 0 0 0 rgba(248,113,113,0.5); }
+    70% { box-shadow: 0 0 0 7px rgba(248,113,113,0); }
+    100% { box-shadow: 0 0 0 0 rgba(248,113,113,0); }
+  }
+  .slide-r { animation: slideR .28s var(--ease); }
+  .slide-l { animation: slideL .28s var(--ease); }
+  @keyframes slideR { from { transform: translateX(26px); } to { transform: translateX(0); } }
+  @keyframes slideL { from { transform: translateX(-26px); } to { transform: translateX(0); } }
+  .fade-in { animation: fadeIn .2s ease; }
+  @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+  .sheet-up { animation: sheetUp .32s var(--ease); }
+  @keyframes sheetUp { from { transform: translateY(22px); } to { transform: translateY(0); } }
+  .toast-pop { animation: toastPop .3s var(--ease); }
+  @keyframes toastPop { from { opacity: 0; transform: translateY(12px) scale(.97); } to { opacity: 1; transform: translateY(0) scale(1); } }
+  .bar-row { animation: barIn .4s var(--ease) both; }
+  @keyframes barIn { from { transform: translateY(7px); } to { transform: translateY(0); } }
+
+  input::placeholder { color: var(--text-4); }
+  button { -webkit-tap-highlight-color: transparent; }
+
+  @media (max-width: 460px) {
+    .stage { padding: 16px 10px 32px; }
+  }
+</style>
+</head>
+<body>
+  <div id="root"></div>
+
+  <script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+
+  <script type="text/babel" src="ios-frame.jsx"></script>
+  <script type="text/babel" src="nondit-data.jsx"></script>
+  <script type="text/babel" src="nondit-ui.jsx"></script>
+  <script type="text/babel" src="nondit-juror.jsx"></script>
+  <script type="text/babel" src="nondit-capture.jsx"></script>
+  <script type="text/babel" src="nondit-founder.jsx"></script>
+  <script type="text/babel" src="nondit-organizer.jsx"></script>
+  <script type="text/babel" src="nondit-app.jsx"></script>
+</body>
+</html>

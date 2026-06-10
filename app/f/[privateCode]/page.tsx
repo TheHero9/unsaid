@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import { Inbox, Users } from "lucide-react";
+import { Users } from "lucide-react";
 
 import { getAdminClient } from "@/lib/supabase/admin";
 import {
@@ -14,6 +14,7 @@ import { ChipSummary } from "@/components/feedback/ChipSummary";
 import { SentimentBar } from "@/components/feedback/SentimentBar";
 import { CriteriaScores } from "@/components/feedback/CriteriaScores";
 import { NotesFeed } from "@/components/feedback/NotesFeed";
+import { ShareButton } from "@/components/feedback/ShareButton";
 
 // Feedback is live - never cache; fresh on every load.
 export const dynamic = "force-dynamic";
@@ -138,48 +139,67 @@ export default async function FounderPage({ params }: FounderPageProps) {
   const hasFeedback = aggregate.jurorCount > 0;
 
   return (
-    <main className="mx-auto flex w-full max-w-md flex-1 flex-col gap-8 px-5 py-10">
-      <header className="space-y-1">
-        {pitch.eventName && (
-          <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
-            {pitch.eventName}
-          </p>
-        )}
-        <h1 className="text-3xl font-semibold tracking-tight text-balance">
-          {pitch.name}
-        </h1>
-        {hasFeedback && (
-          <p className="flex items-center gap-1.5 pt-1 text-sm text-muted-foreground">
-            <Users className="size-4" aria-hidden />
-            Feedback from {aggregate.jurorCount} juror
-            {aggregate.jurorCount === 1 ? "" : "s"}
-          </p>
-        )}
+    <main className="mx-auto flex w-full max-w-md flex-1 flex-col px-[22px] pb-12 pt-14">
+      <header>
+        <div className="flex items-start justify-between gap-3">
+          <div className="min-w-0">
+            {pitch.eventName && (
+              <p className="text-[12px] font-bold uppercase tracking-[0.06em] text-text-3">
+                {pitch.eventName}
+              </p>
+            )}
+            <h1 className="mt-1.5 font-serif text-[38px] font-semibold leading-[1.02] tracking-[-0.02em] text-text">
+              {pitch.name}
+            </h1>
+          </div>
+          <ShareButton title={pitch.name} />
+        </div>
+        <p className="mt-3 flex items-center gap-1.5 text-[13.5px] font-medium text-text-3">
+          <Users className="size-4" aria-hidden />
+          Feedback from {aggregate.jurorCount} juror
+          {aggregate.jurorCount === 1 ? "" : "s"}
+        </p>
       </header>
 
       {hasFeedback ? (
         <>
-          <ChipSummary chipCounts={aggregate.chipCounts} />
-          <SentimentBar
-            positiveCount={aggregate.positiveCount}
-            negativeCount={aggregate.negativeCount}
-            neutralCount={aggregate.neutralCount}
-          />
-          <CriteriaScores
-            criteriaScores={aggregate.criteriaScores}
-            personalScores={aggregate.personalScores}
-          />
-          <NotesFeed notes={aggregate.notes} />
+          <div className="mt-7">
+            <SentimentBar
+              positiveCount={aggregate.positiveCount}
+              negativeCount={aggregate.negativeCount}
+              neutralCount={aggregate.neutralCount}
+            />
+          </div>
+          <div className="mt-8">
+            <ChipSummary chipCounts={aggregate.chipCounts} />
+          </div>
+          <div className="mt-8">
+            <CriteriaScores
+              criteriaScores={aggregate.criteriaScores}
+              personalScores={aggregate.personalScores}
+            />
+          </div>
+          <div className="mt-8">
+            <NotesFeed notes={aggregate.notes} />
+          </div>
+
+          <p className="mt-7 border-t border-border pt-[18px] text-center text-[12.5px] leading-[1.5] text-text-4">
+            Anonymous by design. No names, no ranking - just the honest read,
+            handed back to you.
+          </p>
         </>
       ) : (
-        <div className="flex flex-1 flex-col items-center justify-center gap-4 py-16 text-center">
-          <div className="flex size-14 items-center justify-center rounded-2xl bg-secondary">
-            <Inbox className="size-7 text-muted-foreground" aria-hidden />
+        <div className="flex flex-1 flex-col items-center justify-center gap-[18px] py-16 text-center">
+          <div className="flex size-14 items-center justify-center rounded-full border border-border bg-surface-2">
+            <Users className="size-[26px] text-text-3" aria-hidden />
           </div>
-          <div className="space-y-1">
-            <p className="text-lg font-medium">No feedback yet</p>
-            <p className="text-sm text-muted-foreground">
-              Check back after the pitches - this page updates as jurors submit.
+          <div className="space-y-2">
+            <p className="font-serif text-[22px] font-semibold text-text">
+              No feedback yet
+            </p>
+            <p className="mx-auto max-w-[280px] text-[14.5px] leading-[1.5] text-text-3">
+              When jurors start tapping during your pitch, their honest read
+              shows up here - anonymous, and yours alone.
             </p>
           </div>
         </div>
