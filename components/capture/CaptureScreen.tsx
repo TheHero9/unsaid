@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useRef, useState, useTransition } from "react";
+import { useEffect, useMemo, useRef, useState, useTransition } from "react";
 import { Check, Send } from "lucide-react";
 import { toast } from "sonner";
 
@@ -8,13 +8,20 @@ import { cn } from "@/lib/utils";
 import type { ChipSentiment } from "@/lib/chips";
 import { RATING_MAX, RATING_MIN, NOTE_MAX_LENGTH } from "@/schemas/feedback";
 import {
+  loadCaptureCache,
+  saveCaptureCache,
+  type CaptureCache,
+} from "@/lib/capture-cache";
+import {
   addCustomChip,
+  addCustomCriterion,
   submitFeedback,
 } from "@/app/e/[eventCode]/p/[pitchId]/actions";
 
 import { PitchSwitcher } from "./PitchSwitcher";
 import { JumpSheet } from "./JumpSheet";
 import { AddOwnChip, type AddedChip } from "./AddOwnChip";
+import { AddOwnCriterion, type AddedCriterion } from "./AddOwnCriterion";
 import { CHIP_ACTIVE, CHIP_IDLE, SENTIMENT_ORDER } from "./sentiment";
 
 export interface CapturePitch {
@@ -34,6 +41,7 @@ export interface CaptureCriterion {
 
 interface CaptureScreenProps {
   eventCode: string;
+  jurorId: string;
   pitches: CapturePitch[];
   initialPitchId: string;
   chips: CaptureChip[];
@@ -61,10 +69,11 @@ const SCORES = Array.from(
 
 export function CaptureScreen({
   eventCode,
+  jurorId,
   pitches,
   initialPitchId,
   chips: initialChips,
-  criteria,
+  criteria: initialCriteria,
   submittedPitchIds,
 }: CaptureScreenProps) {
   const initialIdx = Math.max(
@@ -74,6 +83,8 @@ export function CaptureScreen({
 
   const [idx, setIdx] = useState(initialIdx);
   const [chips, setChips] = useState<CaptureChip[]>(initialChips);
+  const [criteria, setCriteria] =
+    useState<CaptureCriterion[]>(initialCriteria);
   const [drafts, setDrafts] = useState<Map<string, Draft>>(new Map());
   const [doneSet, setDoneSet] = useState<Set<number>>(
     () =>
@@ -86,6 +97,98 @@ export function CaptureScreen({
   const [sheetOpen, setSheetOpen] = useState(false);
   const [anim, setAnim] = useState<"r" | "l" | null>(null);
   const [pending, startTransition] = useTransition();
+
+  // Ids that came from the server this load - everything else in chips/criteria
+  // is a juror-added custom item and is what we mirror into the local cache.
+  const serverChipIds = useRef(new Set(initialChips.map((c) => c.id)));
+  const serverCriterionIds = useRef(
+    new Set(initialCriteria.map((c) => c.id))
+  );
+  const hydrated = useRef(false);
+
+  // Hydrate from localStorage once on mount: re-show the juror's custom chips +
+  // criteria (so a slider added on one pitch survives a refresh and appears on
+  // every pitch) and restore each pitch's draft so the juror sees exactly what
+  // they rated. State updates run asynchronously (never synchronously in the
+  // effect body) so the first client render matches the server markup.
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      const cache = loadCaptureCache(eventCode, jurorId);
+      if (cancelled) return;
+
+      if (cache.customChips.length > 0) {
+        setChips((prev) => {
+          const seen = new Set(prev.map((c) => c.id));
+          const extra = cache.customChips.filter((c) => !seen.has(c.id));
+          return extra.length > 0 ? [...prev, ...extra] : prev;
+        });
+      }
+
+      if (cache.customCriteria.length > 0) {
+        setCriteria((prev) => {
+          const seen = new Set(prev.map((c) => c.id));
+          const extra = cache.customCriteria.filter((c) => !seen.has(c.id));
+          return extra.length > 0 ? [...prev, ...extra] : prev;
+        });
+      }
+
+      if (Object.keys(cache.drafts).length > 0) {
+        const restored = new Map<string, Draft>();
+        for (const [pitchId, d] of Object.entries(cache.drafts)) {
+          restored.set(pitchId, {
+            chipIds: new Set(d.chipIds),
+            scores: new Map(Object.entries(d.scores)),
+            note: d.note,
+          });
+        }
+        setDrafts(restored);
+      }
+
+      if (cache.done.length > 0) {
+        setDoneSet((prev) => {
+          const next = new Set(prev);
+          for (const pid of cache.done) {
+            const i = pitches.findIndex((p) => p.id === pid);
+            if (i >= 0) next.add(i);
+          }
+          return next;
+        });
+      }
+
+      hydrated.current = true;
+    })();
+    return () => {
+      cancelled = true;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // Persist on every change (after hydration) so a refresh / re-open restores
+  // custom chips, custom criteria, drafts, and submitted state.
+  useEffect(() => {
+    if (!hydrated.current) return;
+    const cache: CaptureCache = {
+      customChips: chips.filter((c) => !serverChipIds.current.has(c.id)),
+      customCriteria: criteria.filter(
+        (c) => !serverCriterionIds.current.has(c.id)
+      ),
+      drafts: Object.fromEntries(
+        Array.from(drafts, ([pitchId, d]) => [
+          pitchId,
+          {
+            chipIds: Array.from(d.chipIds),
+            scores: Object.fromEntries(d.scores),
+            note: d.note,
+          },
+        ])
+      ),
+      done: Array.from(doneSet)
+        .map((i) => pitches[i]?.id)
+        .filter((id): id is string => Boolean(id)),
+    };
+    saveCaptureCache(eventCode, jurorId, cache);
+  }, [chips, criteria, drafts, doneSet, eventCode, jurorId, pitches]);
 
   const scrollRef = useRef<HTMLDivElement>(null);
   const touch = useRef<{ x: number; y: number } | null>(null);
@@ -160,6 +263,20 @@ export function CaptureScreen({
       ...d,
       chipIds: new Set(d.chipIds).add(chip.id),
     }));
+  };
+
+  const handleAddCriterion = async (label: string): Promise<AddedCriterion> => {
+    const res = await addCustomCriterion(eventCode, pitch.id, { label });
+    if (!res.ok) throw new Error(res.error);
+    return res.criterion;
+  };
+
+  // A juror-added criterion joins the shared list, so it shows on EVERY pitch,
+  // not just the one it was created on, and is cached for the next visit.
+  const handleCriterionAdded = (criterion: AddedCriterion) => {
+    setCriteria((prev) =>
+      prev.some((c) => c.id === criterion.id) ? prev : [...prev, criterion]
+    );
   };
 
   const noticed = draft.chipIds.size;
@@ -277,23 +394,23 @@ export function CaptureScreen({
                 <AddOwnChip onAdd={handleAddChip} onAdded={handleChipAdded} />
               </div>
 
-              {criteria.length > 0 && (
-                <>
-                  <SectionLabel hint="optional · tap again to clear">
-                    Rate the pitch
-                  </SectionLabel>
-                  <div className="mb-6 flex flex-col gap-4">
-                    {criteria.map((cr) => (
-                      <RatingRow
-                        key={cr.id}
-                        label={cr.label}
-                        value={draft.scores.get(cr.id) ?? null}
-                        onSet={(v) => setScore(cr.id, v)}
-                      />
-                    ))}
-                  </div>
-                </>
-              )}
+              <SectionLabel hint="optional · tap again to clear">
+                Rate the pitch
+              </SectionLabel>
+              <div className="mb-6 flex flex-col gap-4">
+                {criteria.map((cr) => (
+                  <RatingRow
+                    key={cr.id}
+                    label={cr.label}
+                    value={draft.scores.get(cr.id) ?? null}
+                    onSet={(v) => setScore(cr.id, v)}
+                  />
+                ))}
+                <AddOwnCriterion
+                  onAdd={handleAddCriterion}
+                  onAdded={handleCriterionAdded}
+                />
+              </div>
 
               <SectionLabel hint="optional">Add a one-line note</SectionLabel>
               <input

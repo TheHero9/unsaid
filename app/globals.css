@@ -268,3 +268,11 @@
 button {
   -webkit-tap-highlight-color: transparent;
 }
+
+/* Toast close (X): always visible + tap-friendly. Sonner hides it behind a
+   hover state by default, which is unreachable on touch devices. */
+[data-sonner-toast] [data-close-button] {
+  opacity: 1;
+  width: 22px;
+  height: 22px;
+}

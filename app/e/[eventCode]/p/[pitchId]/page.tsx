@@ -126,6 +126,7 @@ export default async function CapturePage({ params }: PageParams) {
   return (
     <CaptureScreen
       eventCode={normalizedCode}
+      jurorId={juror.id}
       pitches={pitches}
       initialPitchId={pitchId}
       chips={chips}

@@ -49,7 +49,7 @@ export default function RootLayout({
     >
       <body className="min-h-full flex flex-col">
         {children}
-        <Toaster richColors position="top-center" theme="dark" />
+        <Toaster richColors closeButton position="top-center" theme="dark" />
       </body>
     </html>
   );
