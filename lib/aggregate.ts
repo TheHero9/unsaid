@@ -63,6 +63,37 @@ export interface CriterionScore {
   count: number;
 }
 
+/** One chip on a single juror's submission card. */
+export interface SubmissionChip {
+  label: string;
+  sentiment: ChipSentiment;
+}
+
+/** One score on a single juror's submission card. */
+export interface SubmissionScore {
+  label: string;
+  score: number;
+  /** true = a juror's personal criterion; false = event-wide. */
+  personal: boolean;
+}
+
+/**
+ * One juror's submission, ANONYMISED. Identity never crosses this boundary:
+ * jurors get a stable 1-based `index` (assigned in submission order), never a
+ * name or id. This powers the "juror by juror" breakdown on the founder page.
+ */
+export interface JurorSubmission {
+  /** 1-based anonymous label ("Juror 1", "Juror 2", ... in submission order). */
+  index: number;
+  createdAt: string;
+  chips: SubmissionChip[];
+  scores: SubmissionScore[];
+  note: string | null;
+  positiveCount: number;
+  neutralCount: number;
+  negativeCount: number;
+}
+
 export interface AggregatedFeedback {
   /** Distinct jurors who submitted any feedback for this pitch. */
   jurorCount: number;
@@ -78,6 +109,8 @@ export interface AggregatedFeedback {
   personalScores: CriterionScore[];
   /** Non-empty notes only, newest first. */
   notes: AggregatedNote[];
+  /** Per-juror submissions, anonymised, oldest first. */
+  submissions: JurorSubmission[];
 }
 
 interface ChipAccumulator {
@@ -94,19 +127,49 @@ interface CriterionAccumulator {
 }
 
 /**
+ * Keep only each juror's LATEST submission. A juror can have several
+ * `u_feedback` rows for one pitch (the capture screen's "Update & next"
+ * inserts a fresh row each time); without this, their chips/scores/notes would
+ * be counted once per resubmission and inflate every total. We treat the
+ * newest row (by `createdAt`) as the juror's current answer.
+ */
+function latestPerJuror(rows: FeedbackInput[]): FeedbackInput[] {
+  const byJuror = new Map<string, FeedbackInput>();
+  for (const row of rows) {
+    const current = byJuror.get(row.jurorId);
+    if (
+      !current ||
+      new Date(row.createdAt).getTime() >= new Date(current.createdAt).getTime()
+    ) {
+      byJuror.set(row.jurorId, row);
+    }
+  }
+  return Array.from(byJuror.values());
+}
+
+/**
  * Aggregate raw feedback rows into the founder-view shape.
  *
+ * - Only each juror's LATEST submission counts (see `latestPerJuror`).
  * - Chips group by `normalizeLabel()` across ALL jurors regardless of which
  *   juror authored the chip; the display label is the first original casing seen.
  * - `jurorCount` per chip = distinct jurors who selected that label at least
  *   once (a juror selecting the same label twice counts once).
  * - positive/negative/neutralCount = total raw selections by sentiment.
  * - notes: non-empty only, newest first.
+ * - submissions: one anonymised card per juror, oldest first.
  */
-export function aggregateFeedback(rows: FeedbackInput[]): AggregatedFeedback {
+export function aggregateFeedback(input: FeedbackInput[]): AggregatedFeedback {
+  // Oldest first so anonymous juror indices follow submission order.
+  const rows = latestPerJuror(input).sort(
+    (a, b) =>
+      new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
+  );
+
   const jurorIds = new Set<string>();
   const chipMap = new Map<string, ChipAccumulator>();
   const criterionMap = new Map<string, CriterionAccumulator>();
+  const submissions: JurorSubmission[] = [];
 
   let positiveCount = 0;
   let negativeCount = 0;
@@ -117,11 +180,22 @@ export function aggregateFeedback(rows: FeedbackInput[]): AggregatedFeedback {
   for (const row of rows) {
     jurorIds.add(row.jurorId);
 
+    let subPositive = 0;
+    let subNeutral = 0;
+    let subNegative = 0;
+
     for (const chip of row.chips) {
       // Raw selection counts (every selection, including a juror's repeats).
-      if (chip.sentiment === "positive") positiveCount += 1;
-      else if (chip.sentiment === "negative") negativeCount += 1;
-      else neutralCount += 1;
+      if (chip.sentiment === "positive") {
+        positiveCount += 1;
+        subPositive += 1;
+      } else if (chip.sentiment === "negative") {
+        negativeCount += 1;
+        subNegative += 1;
+      } else {
+        neutralCount += 1;
+        subNeutral += 1;
+      }
 
       const key = normalizeLabel(chip.label);
       const existing = chipMap.get(key);
@@ -157,6 +231,21 @@ export function aggregateFeedback(rows: FeedbackInput[]): AggregatedFeedback {
     if (trimmedNote) {
       notes.push({ note: trimmedNote, createdAt: row.createdAt });
     }
+
+    submissions.push({
+      index: submissions.length + 1,
+      createdAt: row.createdAt,
+      chips: row.chips.map((c) => ({ label: c.label, sentiment: c.sentiment })),
+      scores: (row.ratings ?? []).map((r) => ({
+        label: r.label,
+        score: r.score,
+        personal: r.personal,
+      })),
+      note: trimmedNote || null,
+      positiveCount: subPositive,
+      neutralCount: subNeutral,
+      negativeCount: subNegative,
+    });
   }
 
   const chipCounts: ChipCount[] = Array.from(chipMap.values())
@@ -205,5 +294,6 @@ export function aggregateFeedback(rows: FeedbackInput[]): AggregatedFeedback {
     criteriaScores,
     personalScores,
     notes,
+    submissions,
   };
 }

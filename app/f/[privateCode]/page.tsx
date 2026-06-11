@@ -13,7 +13,7 @@ import type { ChipSentiment } from "@/lib/chips";
 import { ChipSummary } from "@/components/feedback/ChipSummary";
 import { SentimentBar } from "@/components/feedback/SentimentBar";
 import { CriteriaScores } from "@/components/feedback/CriteriaScores";
-import { NotesFeed } from "@/components/feedback/NotesFeed";
+import { JurorBreakdown } from "@/components/feedback/JurorBreakdown";
 import { ShareButton } from "@/components/feedback/ShareButton";
 
 // Feedback is live - never cache; fresh on every load.
@@ -179,11 +179,11 @@ export default async function FounderPage({ params }: FounderPageProps) {
               personalScores={aggregate.personalScores}
             />
           </div>
-          <div className="mt-8">
-            <NotesFeed notes={aggregate.notes} />
+          <div className="mt-9">
+            <JurorBreakdown submissions={aggregate.submissions} />
           </div>
 
-          <p className="mt-7 border-t border-border pt-[18px] text-center text-[12.5px] leading-[1.5] text-text-4">
+          <p className="mt-9 border-t border-border pt-[18px] text-center text-[12.5px] leading-[1.5] text-text-4">
             Anonymous by design. No names, no ranking - just the honest read,
             handed back to you.
           </p>

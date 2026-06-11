@@ -256,6 +256,16 @@ export async function submitFeedback(
     }
   }
 
+  // "Update" semantics: a juror has at most ONE submission per pitch. Remove any
+  // prior submission (its chips + ratings cascade away) before inserting the
+  // fresh one, so resubmitting via "Update & next" REPLACES the previous answer
+  // instead of stacking duplicate rows that would inflate the founder's totals.
+  await admin
+    .from("u_feedback")
+    .delete()
+    .eq("juror_id", jurorId)
+    .eq("pitch_id", verifiedPitchId);
+
   const { data: feedback, error: feedbackError } = await admin
     .from("u_feedback")
     .insert({

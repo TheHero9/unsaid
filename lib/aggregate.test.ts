@@ -26,6 +26,7 @@ describe("aggregateFeedback", () => {
       criteriaScores: [],
       personalScores: [],
       notes: [],
+      submissions: [],
     });
   });
 
@@ -60,7 +61,7 @@ describe("aggregateFeedback", () => {
     ]);
   });
 
-  it("averages repeat scores for the same criterion", () => {
+  it("averages repeat scores for the same criterion across DIFFERENT jurors", () => {
     const result = aggregateFeedback([
       row({
         id: "f1",
@@ -71,7 +72,7 @@ describe("aggregateFeedback", () => {
       }),
       row({
         id: "f2",
-        jurorId: "j1", // same juror re-rates in a later submission
+        jurorId: "j2",
         ratings: [
           { criterionId: "c1", label: "team", personal: false, score: 3 },
         ],
@@ -81,6 +82,77 @@ describe("aggregateFeedback", () => {
     expect(result.criteriaScores).toEqual([
       { label: "team", average: 2.5, count: 2 },
     ]);
+  });
+
+  it("keeps only a juror's LATEST submission (resubmit replaces, never inflates)", () => {
+    // The capture screen's "Update & next" inserts a fresh row each time; the
+    // founder view must reflect the newest answer, not the sum of resubmissions.
+    const result = aggregateFeedback([
+      row({
+        id: "f1",
+        jurorId: "j1",
+        createdAt: "2026-06-07T10:00:00.000Z",
+        chips: [
+          { label: "big market", sentiment: "positive" },
+          { label: "strong team", sentiment: "positive" },
+        ],
+        ratings: [
+          { criterionId: "c1", label: "team", personal: false, score: 2 },
+        ],
+        note: "first take",
+      }),
+      row({
+        id: "f2",
+        jurorId: "j1", // same juror resubmits later - this is their real answer
+        createdAt: "2026-06-07T11:00:00.000Z",
+        chips: [{ label: "unclear ask", sentiment: "negative" }],
+        ratings: [
+          { criterionId: "c1", label: "team", personal: false, score: 5 },
+        ],
+        note: "actually, my real take",
+      }),
+    ]);
+
+    // One juror, one submission - earlier row is dropped entirely.
+    expect(result.jurorCount).toBe(1);
+    expect(result.submissions).toHaveLength(1);
+    // Counts reflect ONLY the latest row (1 negative chip), not 2 positives.
+    expect(result.positiveCount).toBe(0);
+    expect(result.negativeCount).toBe(1);
+    expect(result.criteriaScores).toEqual([
+      { label: "team", average: 5, count: 1 },
+    ]);
+    expect(result.notes).toEqual([
+      { note: "actually, my real take", createdAt: "2026-06-07T11:00:00.000Z" },
+    ]);
+    expect(result.submissions[0]).toMatchObject({
+      index: 1,
+      note: "actually, my real take",
+      positiveCount: 0,
+      negativeCount: 1,
+    });
+  });
+
+  it("numbers submissions anonymously in submission order, with no juror id", () => {
+    const result = aggregateFeedback([
+      row({
+        id: "f2",
+        jurorId: "j2",
+        createdAt: "2026-06-07T11:00:00.000Z",
+        chips: [{ label: "memorable", sentiment: "neutral" }],
+      }),
+      row({
+        id: "f1",
+        jurorId: "j1",
+        createdAt: "2026-06-07T09:00:00.000Z",
+        chips: [{ label: "clear problem", sentiment: "positive" }],
+      }),
+    ]);
+
+    // Oldest first -> j1 is "Juror 1", j2 is "Juror 2".
+    expect(result.submissions.map((s) => s.index)).toEqual([1, 2]);
+    expect(result.submissions[0].chips[0].label).toBe("clear problem");
+    expect(JSON.stringify(result.submissions)).not.toContain("j1");
   });
 
   it("groups chips across different label casings/whitespace under one count", () => {
